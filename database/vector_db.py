@@ -92,7 +92,3 @@ def main():
     initialize_index()
     upsert_data()
     # delete_index()
-
-
-    
-    
