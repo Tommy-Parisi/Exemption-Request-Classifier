@@ -2,6 +2,9 @@ from pinecone import Pinecone, ServerlessSpec as pc
 from dotenv import load_dotenv
 import os
 import time
+import csv
+import json
+import re
 
 load_dotenv()
 
@@ -22,77 +25,89 @@ def initialize_index():
         )
 
 def upsert_data():
-    # Example records to upsert, these will be policy rules or exemption criteria
-    records = [
-        { "_id": "rec1", "chunk_text": "The Eiffel Tower was completed in 1889 and stands in Paris, France.", "category": "history" },
-        { "_id": "rec2", "chunk_text": "Photosynthesis allows plants to convert sunlight into energy.", "category": "science" },
-        { "_id": "rec3", "chunk_text": "Albert Einstein developed the theory of relativity.", "category": "science" },
-        { "_id": "rec4", "chunk_text": "The mitochondrion is often called the powerhouse of the cell.", "category": "biology" },
-        { "_id": "rec5", "chunk_text": "Shakespeare wrote many famous plays, including Hamlet and Macbeth.", "category": "literature" },
-        { "_id": "rec6", "chunk_text": "Water boils at 100°C under standard atmospheric pressure.", "category": "physics" },
-        { "_id": "rec7", "chunk_text": "The Great Wall of China was built to protect against invasions.", "category": "history" },
-        { "_id": "rec8", "chunk_text": "Honey never spoils due to its low moisture content and acidity.", "category": "food science" },
-        { "_id": "rec9", "chunk_text": "The speed of light in a vacuum is approximately 299,792 km/s.", "category": "physics" },
-        { "_id": "rec10", "chunk_text": "Newton's laws describe the motion of objects.", "category": "physics" },
-        { "_id": "rec11", "chunk_text": "The human brain has approximately 86 billion neurons.", "category": "biology" },
-        { "_id": "rec12", "chunk_text": "The Amazon Rainforest is one of the most biodiverse places on Earth.", "category": "geography" },
-        { "_id": "rec13", "chunk_text": "Black holes have gravitational fields so strong that not even light can escape.", "category": "astronomy" },
-        { "_id": "rec14", "chunk_text": "The periodic table organizes elements based on their atomic number.", "category": "chemistry" },
-        { "_id": "rec15", "chunk_text": "Leonardo da Vinci painted the Mona Lisa.", "category": "art" },
-        { "_id": "rec16", "chunk_text": "The internet revolutionized communication and information sharing.", "category": "technology" },
-        { "_id": "rec17", "chunk_text": "The Pyramids of Giza are among the Seven Wonders of the Ancient World.", "category": "history" },
-        { "_id": "rec18", "chunk_text": "Dogs have an incredible sense of smell, much stronger than humans.", "category": "biology" },
-        { "_id": "rec19", "chunk_text": "The Pacific Ocean is the largest and deepest ocean on Earth.", "category": "geography" },
-        { "_id": "rec20", "chunk_text": "Chess is a strategic game that originated in India.", "category": "games" },
-        { "_id": "rec21", "chunk_text": "The Statue of Liberty was a gift from France to the United States.", "category": "history" },
-        { "_id": "rec22", "chunk_text": "Coffee contains caffeine, a natural stimulant.", "category": "food science" },
-        { "_id": "rec23", "chunk_text": "Thomas Edison invented the practical electric light bulb.", "category": "inventions" },
-        { "_id": "rec24", "chunk_text": "The moon influences ocean tides due to gravitational pull.", "category": "astronomy" },
-        { "_id": "rec25", "chunk_text": "DNA carries genetic information for all living organisms.", "category": "biology" },
-        { "_id": "rec26", "chunk_text": "Rome was once the center of a vast empire.", "category": "history" },
-        { "_id": "rec27", "chunk_text": "The Wright brothers pioneered human flight in 1903.", "category": "inventions" },
-        { "_id": "rec28", "chunk_text": "Bananas are a good source of potassium.", "category": "nutrition" },
-        { "_id": "rec29", "chunk_text": "The stock market fluctuates based on supply and demand.", "category": "economics" },
-        { "_id": "rec30", "chunk_text": "A compass needle points toward the magnetic north pole.", "category": "navigation" },
-        { "_id": "rec31", "chunk_text": "The universe is expanding, according to the Big Bang theory.", "category": "astronomy" },
-        { "_id": "rec32", "chunk_text": "Elephants have excellent memory and strong social bonds.", "category": "biology" },
-        { "_id": "rec33", "chunk_text": "The violin is a string instrument commonly used in orchestras.", "category": "music" },
-        { "_id": "rec34", "chunk_text": "The heart pumps blood throughout the human body.", "category": "biology" },
-        { "_id": "rec35", "chunk_text": "Ice cream melts when exposed to heat.", "category": "food science" },
-        { "_id": "rec36", "chunk_text": "Solar panels convert sunlight into electricity.", "category": "technology" },
-        { "_id": "rec37", "chunk_text": "The French Revolution began in 1789.", "category": "history" },
-        { "_id": "rec38", "chunk_text": "The Taj Mahal is a mausoleum built by Emperor Shah Jahan.", "category": "history" },
-        { "_id": "rec39", "chunk_text": "Rainbows are caused by light refracting through water droplets.", "category": "physics" },
-        { "_id": "rec40", "chunk_text": "Mount Everest is the tallest mountain in the world.", "category": "geography" },
-        { "_id": "rec41", "chunk_text": "Octopuses are highly intelligent marine creatures.", "category": "biology" },
-        { "_id": "rec42", "chunk_text": "The speed of sound is around 343 meters per second in air.", "category": "physics" },
-        { "_id": "rec43", "chunk_text": "Gravity keeps planets in orbit around the sun.", "category": "astronomy" },
-        { "_id": "rec44", "chunk_text": "The Mediterranean diet is considered one of the healthiest in the world.", "category": "nutrition" },
-        { "_id": "rec45", "chunk_text": "A haiku is a traditional Japanese poem with a 5-7-5 syllable structure.", "category": "literature" },
-        { "_id": "rec46", "chunk_text": "The human body is made up of about 60% water.", "category": "biology" },
-        { "_id": "rec47", "chunk_text": "The Industrial Revolution transformed manufacturing and transportation.", "category": "history" },
-        { "_id": "rec48", "chunk_text": "Vincent van Gogh painted Starry Night.", "category": "art" },
-        { "_id": "rec49", "chunk_text": "Airplanes fly due to the principles of lift and aerodynamics.", "category": "physics" },
-        { "_id": "rec50", "chunk_text": "Renewable energy sources include wind, solar, and hydroelectric power.", "category": "energy" }
-    ]
+    # Load records from data/data.csv
+    records = []
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.csv')
+    csv_path = os.path.normpath(csv_path)
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+
+    with open(csv_path, encoding='utf-8') as fh:
+        raw = fh.read().strip()
+
+    # Strip code fences if present
+    if raw.startswith('```'):
+        raw = raw.lstrip('`').rstrip('`').strip()
+    
+    # Find all JSON objects: { ... }
+    pattern = r'\{[^{}]*\}'
+    matches = re.findall(pattern, raw, re.DOTALL)
+    
+    for match in matches:
+        try:
+            item = json.loads(match)
+            rec_id = item.get('_id') or item.get('id')
+            text = item.get('chunk_text') or item.get('text')
+            category = item.get('category')
+            if not rec_id:
+                rec_id = f"rec-{len(records)+1}"
+            records.append({"_id": rec_id, "chunk_text": text or "", "category": category or ""})
+        except Exception as e:
+            print(f"Warning: Failed to parse JSON object: {e}")
+            continue
+    
+    print(f"Loaded {len(records)} records from CSV")
 
     dense_index = pc.Index(index_name)
+    print(f"Upserting {len(records)} records to index '{index_name}'...")
     dense_index.upsert_records("policy-and-exemption-criterion", records)
 
-    time.sleep(10) # Wait for index to be ready
-    
+    # Poll until the namespace has at least the number of upserted vectors
+    namespace = "policy-and-exemption-criterion"
+    expected_count = len(records)
+    timeout = 60  # seconds
+    interval = 5  # seconds
+    start = time.time()
+
+    print(f"Waiting for {expected_count} vectors to be indexed in namespace '{namespace}'...")
+    while True:
+        try:
+            stats = dense_index.describe_index_stats()
+            
+            vector_count = 0
+            if hasattr(stats, 'namespaces') and namespace in stats.namespaces:
+                ns = stats.namespaces[namespace]
+                vector_count = ns.get('vector_count', 0) if isinstance(ns, dict) else getattr(ns, 'vector_count', 0)
+            
+            print(f"Current vectors in namespace: {vector_count}")
+            if int(vector_count) >= expected_count:
+                print(f"Index ready!")
+                break
+        except Exception as e:
+            # Keep trying until timeout
+            print(f"(polling... error: {type(e).__name__}: {e})")
+            pass
+
+        if time.time() - start > timeout:
+            raise TimeoutError(f"Timed out waiting for index namespace '{namespace}' to reach {expected_count} vectors")
+
+        time.sleep(interval)
+
+    # Once ready, print stats
     stats = dense_index.describe_index_stats()
-    print(stats)
+    print("Index stats:")
 
 def delete_index():
     if pc.has_index(index_name):
         pc.delete_index(index_name)
 
 def main():
+    print("Initializing index...")
     initialize_index()
+    print("Upserting data...")
     upsert_data()
+    print("Done!")
     # delete_index()
 
-
-    
-    
+if __name__ == "__main__":
+    main()
