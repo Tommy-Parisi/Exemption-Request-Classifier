@@ -1,0 +1,760 @@
+[
+
+  {
+    "_id": "IS 1.1.1",
+    "control_id": "IS 1.1.1",
+    "risk_area": "IS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": 31,
+    "nist_reference": "University Information Security Policy",
+    "is_exception_related": true,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Complete the Secure UD Compliance and Risk Survey (Secure UD CARS) as required by the unit's data trustee.",
+      "Identify security controls, resources, and planned timelines to close control gaps.",
+      "Submit Secure UD CARS results to the unit's data trustee and IT Security for review."
+    ],
+    "note": "Identify security controls, resources, and planned timelines to close control gaps.",
+    "references": "NIST SP 800-53 RA-1, RA-3; Secure UD Compliance and Risk Survey question #1"
+  },
+  {
+    "_id": "IS 1.1.2",
+    "control_id": "IS 1.1.2",
+    "risk_area": "IS",
+    "classification_levels": ["III"],
+    "page_number": 31,
+    "nist_reference": "University Information Security Policy",
+    "is_exception_related": true,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Complete a risk assessment where required by law or regulation for all information systems that process, store, or transmit Level III University information.",
+      "Identify and characterize IT resources.",
+      "Identify threat sources and capabilities.",
+      "Identify threat events.",
+      "Identify vulnerabilities.",
+      "Assess existing security controls.",
+      "Assess likelihood of threat occurrence.",
+      "Assess potential adverse impacts.",
+      "Assign an overall risk rating.",
+      "Develop a plan to remediate risk.",
+      "Perform comprehensive analysis and detailed reporting.",
+      "Submit risk assessment results to the unit's data trustee and IT Security for review and approval."
+    ],
+    "note": "This security control applies to both cloud and traditional information systems.",
+    "references": "NIST SP 800-53 RA-1, RA-3; Secure UD Compliance and Risk Survey question #2"
+  },
+  {
+  "_id": "IS 1.2.1",
+  "control_id": "IS 1.2.1",
+  "risk_area": "IS",
+  "classification_levels": ["I", "II", "III"],
+  "page_number": 31,
+  "nist_reference": "NIST SP 800-53 PM-9; Secure UD Data Governance & Security Program; Secure UD Compliance and Risk Survey question #3",
+  "is_exception_related": false,
+  "requires_approval": true,
+  "approver_role": "Unit’s data trustee and IT Security",
+  "requirements": [
+    "Develop, implement, and maintain a risk management strategy for each of the 25 risk management objectives identified in the Secure UD Data Governance & Security Program.",
+    "Identify the current level of risk as assessed in the most recently completed Secure UD Compliance and Risk Survey (Secure UD CARS).",
+    "Identify the risk management decision for this risk management objective (retain, reduce, share, or avoid the risk).",
+    "Update the risk management strategy annually or after unit or technological changes.",
+    "Submit the risk management strategy to the unit’s data trustee and IT Security for review and approval after each update."
+  ],
+  "note": "The Secure UD CARS includes guidance and a template for creating a three-year risk management strategy.",
+  "references": "NIST SP 800-53 PM-9; Secure UD Data Governance & Security Program; Secure UD Compliance and Risk Survey question #3"
+},
+{
+  "_id": "IS 1.3.1",
+  "control_id": "IS 1.3.1",
+  "risk_area": "IS",
+  "classification_levels": ["I", "II", "III"],
+  "page_number": 31,
+  "nist_reference": "NIST SP 800-53 AU-1, CA-1, CA-2; University Information Security Policy; Secure UD Compliance and Risk Survey",
+  "is_exception_related": false,
+  "requires_approval": true,
+  "approver_role": "Unit’s data trustee and IT Security",
+  "requirements": [
+    "Complete an IT security assessment as required by the unit’s data trustee to ensure that security controls meet the risk management objectives specified in the Secure UD Data Governance & Security Program.",
+    "Perform security self-assessments using the Secure UD Compliance and Risk Survey (Secure UD CARS).",
+    "Conduct security assessments performed by a University-approved security assessor.",
+    "Submit security assessment results to the unit’s data trustee and IT Security for review."
+  ],
+  "note": "For many units, the Secure UD CARS satisfies the minimum requirements for this control. Additional unit, legal, regulatory, or contractual security assessment requirements may also apply.",
+  "references": "NIST SP 800-53 AU-1, CA-1, CA-2; University Information Security Policy; Secure UD Compliance and Risk Survey"
+},
+{
+  "_id": "IS 2.1.1",
+  "control_id": "IS 2.1.1",
+  "risk_area": "IS",
+  "classification_levels": ["I", "II", "III"],
+  "page_number": 32,
+  "nist_reference": "NIST SP 800-53 PL-1, PM-1; Secure UD Data Governance & Security Program; Secure UD Security Plan Tool; Secure UD Compliance and Risk Survey question #4",
+  "is_exception_related": false,
+  "requires_approval": true,
+  "approver_role": "Unit’s data trustee and IT Security",
+  "requirements": [
+    "Develop, implement, and maintain an information security plan for each of the 25 risk management objectives identified in the Secure UD Data Governance & Security Program.",
+    "Identify the security controls that will be implemented by the unit, consistent with the unit’s risk management strategy.",
+    "Apply the University’s security resources, including services, templates, and job aids, as appropriate.",
+    "Address security requirements as they apply to both University-owned and personal (or work-from-home) devices used for University activities.",
+    "Update the information security plan annually or after major unit or technological changes."
+  ],
+  "note": null,
+  "references": "NIST SP 800-53 PL-1, PM-1; Secure UD Data Governance & Security Program; Secure UD Security Plan Tool; Secure UD Compliance and Risk Survey question #4"
+},
+{
+  "_id": "IS 2.1.2",
+  "control_id": "IS 2.1.2",
+  "risk_area": "IS",
+  "classification_levels": ["I", "II", "III"],
+  "page_number": 32,
+  "nist_reference": "University Information Security Policy",
+  "is_exception_related": true,
+  "requires_approval": true,
+  "approver_role": "Unit Head",
+  "requirements": [
+    "Exceptions to security standards and controls must be justified by operational or technical needs.",
+    "Document policy exceptions (including exceptions to information security plans, standards, and controls) in the unit information security plan.",
+    "Include documentation of the exception being requested or implemented and the operational or technical need for the exception.",
+    "Ensure all exceptions are approved by the unit head."
+  ],
+  "note": "The unit may consult with IT as necessary to determine the appropriateness of exceptions.",
+  "references": "University Information Security Policy"
+},
+{
+  "_id": "IS 2.2.1",
+  "control_id": "IS 2.2.1",
+  "risk_area": "IS",
+  "classification_levels": ["I", "II", "III"],
+  "page_number": 32,
+  "nist_reference": "NIST SP 800-53 PM-2, PM-10; University Information Security Policy",
+  "is_exception_related": false,
+  "requires_approval": false,
+  "approver_role": null,
+  "requirements": [
+    "Appoint at least one local support provider for each unit IT device.",
+    "Ensure that employees understand their information security roles and responsibilities."
+  ],
+  "note": null,
+  "references": "NIST SP 800-53 PM-2, PM-10; University Information Security Policy"
+},
+{
+    "_id": "AQ 1.1.1",
+    "control_id": "AQ 1.1.1",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 RA-3, SA-1, SA-4, SA-5",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Identify the privacy, security, operational, policy, legal, regulatory, contractual, or other risks to any University information to be accessed, processed, stored, or transmitted by vendors."
+    ],
+    "note": "Security concerns include the confidentiality, integrity, and availability of data.",
+    "references": "NIST SP 800-53 RA-3, SA-1, SA-4, SA-5"
+  },
+  {
+    "_id": "AQ 1.1.2",
+    "control_id": "AQ 1.1.2",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 RA-3, SA-1, SA-4, SA-5",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "IT Security",
+    "requirements": [
+      "Complete the Cloud Service Security Assessment Questionnaire for externally-hosted services.",
+      "Submit the Cloud Service Security Assessment Questionnaire to IT Security for review and approval."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 RA-3, SA-1, SA-4, SA-5"
+  },
+  {
+    "_id": "AQ 1.2.1",
+    "control_id": "AQ 1.2.1",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6",
+    "is_exception_related": true,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require a contract for all vendor services except those by which the University information accessed, processed, stored, or transmitted: 1. is not sensitive and therefore poses little to no risk to confidentiality, or legal, regulatory, contractual, or other compliance 2. is not critical or mission critical and therefore would not materially affect operational effectiveness in the short term if it were lost, corrupted, or unavailable.",
+      "Prohibit self-provisioning of cloud computing services to store, process, share, or manage University information for which a contract is required."
+    ],
+    "note": "Contract scope requirements are defined in security control AQ 1.2.3 (p. 36).",
+    "references": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6"
+  },
+  {
+    "_id": "AQ 1.2.2",
+    "control_id": "AQ 1.2.2",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require vendors managing or using University IT resources to be obligated to adhere to University policy."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9"
+  },
+  {
+    "_id": "AQ 1.2.3",
+    "control_id": "AQ 1.2.3",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require that vendor contracts be in writing and include terms and conditions to satisfy all privacy, security, operational, policy, legal, regulatory, contractual, or other requirements for any University information to be processed, stored, or transmitted by cloud vendors."
+    ],
+    "note": "Security concerns include the confidentiality, integrity, and availability of data.",
+    "references": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6"
+  },
+  {
+    "_id": "AQ 1.2.4",
+    "control_id": "AQ 1.2.4",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "IT Security, VP & General Counsel, Procurement Services",
+    "requirements": [
+      "Submit proposed vendor contracts to IT Security, VP & General Counsel, and Procurement Services for review and approval.",
+      "Submit the vendor’s terms of service/use and privacy policy to IT Security for review when a contract is not required."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AC-20, SA-1, SA-4, SA-9; Secure UD Compliance and Risk Survey question #6"
+  },
+  {
+    "_id": "AQ 2.1.1",
+    "control_id": "AQ 2.1.1",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SA-9; Secure UD Compliance and Risk Survey question #7",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "IT Security",
+    "requirements": [
+      "Require vendors processing or transmitting mission critical or Level III information, or providing mission critical services, to submit verification of their security controls to the unit for review annually. Acceptable verification is either: 1. documentation detailing the vendor’s security controls; or 2. attestation from a third-party assessor validating the vendor’s security controls.",
+      "Submit the verification of vendor security controls to IT Security.",
+      "Assess the vendor’s security controls to ensure compliance with laws and regulations governing that vendor’s services to the University."
+    ],
+    "note": "Documentation may include the Cloud Service Security Assessment Questionnaire.\nAttestation may include an SSAE 16 SOC 2 or SOC 3 report.\nAttestation satisfies the requirement to evaluate vendor security controls.",
+    "references": "NIST SP 800-53 SA-9; Secure UD Compliance and Risk Survey question #7"
+  },
+  {
+    "_id": "AQ 2.2.1",
+    "control_id": "AQ 2.2.1",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-20, PS-7, SA-9; Contractor Confidentiality Agreement; Secure UD Compliance and Risk Survey question #8",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require all contractor personnel who work directly with University information to attest to the Contractor Confidentiality Agreement annually.",
+      "Inventory Contractor Confidentiality Agreements."
+    ],
+    "note": "This requirement does not apply to contractor personnel who supply external infrastructure or services.",
+    "references": "NIST SP 800-53 AC-20, PS-7, SA-9; Contractor Confidentiality Agreement; Secure UD Compliance and Risk Survey question #8"
+  },
+  {
+    "_id": "AQ 3.1.1",
+    "control_id": "AQ 3.1.1",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CM-10; Secure UD Compliance and Risk Survey question #9",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Develop, implement, and maintain an inventory of all software presently in local use. For each piece of software, the inventory must identify: a. software publisher/vendor b. software name c. software version d. operating system platform e. software purpose f. number of copies currently installed g. systems on which the software is installed h. software support level (e.g., full support, partial support, minimal support, unsupported) i. software type (e.g., commercial, open source, freeware, shareware, in-house).",
+      "For software types (A.1.i.) of Commercial or shareware, the inventory must contain the following additional information: a. license type (e.g., single use, for a named user or machine; multiple-use, for concurrent/floating users or machines) b. license scope (e.g., institutional site license, unit site license, unit bulk license, or unit individual license).",
+      "For license scopes (A.2.b.) that are unit, the inventory must contain the following additional information: a. purchase date b. license expiration date c. support expiration date (especially for perpetual licenses).",
+      "Update the software inventory annually or after unit or technological changes.",
+      "Submit the software inventory to the unit head for review annually."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CM-10; Secure UD Compliance and Risk Survey question #9"
+  },
+  {
+    "_id": "AQ 3.1.2",
+    "control_id": "AQ 3.1.2",
+    "risk_area": "AQ",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CM-10; Secure UD Compliance and Risk Survey question #9",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Ensure that all software in local use is being used in compliance with license agreements and copyright law.",
+      "Where possible, use University-licensed copies of software."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CM-10; Secure UD Compliance and Risk Survey question #9"
+  },
+  {
+    "_id": "AS 1.1.1",
+    "control_id": "AS 1.1.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SI-10",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Implement features to validate and restrict input to applications, allowing only those data types that are known to be correct. Input validation includes:",
+      "1. checking data syntax and semantics (e.g., character set, length, numerical range, or acceptable values)",
+      "2. verifying that inputs match specified definitions for format and content",
+      "3. validating client-provided data",
+      "4. validating data moving between trusted and untrusted connections."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SI-10"
+  },
+  {
+    "_id": "AS 1.1.2",
+    "control_id": "AS 1.1.2",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SI-10",
+    "is_exception_related": true,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Implement a mechanism for overriding input validation. Manual overrides must:",
+      "1. provide the capability to suppress input validation in limited cases where an exception to standard input is needed",
+      "2. be restricted for use to a limited group of administrative accounts."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SI-10"
+  },
+  {
+    "_id": "AS 1.2.1",
+    "control_id": "AS 1.2.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SI-11",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Restrict application error messages to include information necessary for corrective actions without exposing data that could be exploited.",
+      "Restrict application error message access to only authorized IT staff (e.g., application production support and security management)."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SI-11"
+  },
+  {
+    "_id": "AS 1.3.1",
+    "control_id": "AS 1.3.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-5",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Ensure that applications permit the definition of data roles for the separation of duties at implementation."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AC-5"
+  },
+  {
+    "_id": "AS 1.4.1",
+    "control_id": "AS 1.4.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SC-7",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Configure application system security features (e.g., application firewalls) if available. Application security features include:",
+      "1. verifying and controlling communications at the external boundary of the application system and at key internal boundaries (e.g., web server firewalls, access filters)",
+      "2. terminating network connections associated with a communication session at the end of the session or after a specified and limited period of inactivity based on business or usability requirements."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SC-7"
+  },
+  {
+    "_id": "AS 1.5.1",
+    "control_id": "AS 1.5.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AU-2, AU-3; Secure UD Compliance and Risk Survey question #10",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Log significant application and security events, including:",
+      "1. configuration changes",
+      "2. input validation failures including:",
+      "   a. protocol violations",
+      "   b. unacceptable encodings",
+      "   c. invalid parameter names and values.",
+      "3. authentication failures",
+      "4. authorization failures",
+      "5. application errors including:",
+      "   a. syntax and runtime errors",
+      "   b. connectivity problems",
+      "   c. performance issues",
+      "   d. application specific errors.",
+      "6. alteration or destruction of critical or mission critical logs",
+      "7. session management failures (e.g., cookie session identification value modification)",
+      "8. changes in access to an IT resource."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AU-2, AU-3; Secure UD Compliance and Risk Survey question #10"
+  },
+  {
+    "_id": "AS 1.5.2",
+    "control_id": "AS 1.5.2",
+    "risk_area": "AS",
+    "classification_levels": ["III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AU-2, AU-3; Secure UD Compliance and Risk Survey question #10",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Log additional application and security events for applications accessing, processing, storing, or transmitting Level III information. Additional application and security events include:",
+      "1. use of manual override capabilities",
+      "2. network connections",
+      "3. addition or deletion of users",
+      "4. changes to privileges",
+      "5. assigning users to tokens",
+      "6. adding or deleting tokens",
+      "7. use of administrative privileges",
+      "8. access by application administrators",
+      "9. access to restricted/sensitive/regulated data",
+      "10. use of data encrypting keys",
+      "11. encryption key changes",
+      "12. creation, modification, or deletion of system-level objects",
+      "13. data import and export including screen-based reports",
+      "14. submission of user-generated content (e.g., file uploads)."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AU-2, AU-3; Secure UD Compliance and Risk Survey question #10"
+  },
+  {
+    "_id": "AS 1.6.1",
+    "control_id": "AS 1.6.1",
+    "risk_area": "AS",
+    "classification_levels": ["II", "III"],
+    "page_number": 41,
+    "nist_reference": "NIST SP 800-53 AC-11, IA-11",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Configure inactive authenticated application session suspension. Session suspension must:",
+      "1. prevent further access to the system",
+      "2. be enforced after one of the following conditions:",
+      "   a. an interval of inactivity commensurate with the application’s sensitivity",
+      "   b. receiving a request from the user",
+      "3. persist until the user renews access using established identification and authentication procedures."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AC-11, IA-11"
+  },
+  {
+    "_id": "AS 1.6.2",
+    "control_id": "AS 1.6.2",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AC-11, SC-23",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Implement secure session tracking mechanisms for session-oriented web applications to prevent session hijacking or other session-based attacks. Secure session tracking mechanisms must:",
+      "1. use random (or pseudo-random) session identification (id) numbers",
+      "2. prevent the disclosure of the session id during transit",
+      "3. suspend and/or terminate the session after a period of inactivity",
+      "4. provide the ability for users to terminate their own session",
+      "5. prevent the re-use of the session id after a session is terminated",
+      "6. generate a new session id when moving from nonauthenticated to authenticated sessions",
+      "7. generate session ids in a way that makes them difficult to guess."
+    ],
+    "note": "Session suspension requirements are addressed in security control AS 1.6.1 (p. 41).",
+    "references": "NIST SP 800-53 AC-11, SC-23"
+  },
+  {
+    "_id": "AS 1.7.1",
+    "control_id": "AS 1.7.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SC-5",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Ensure that applications protect against or limit the effects of denial of service attacks. Denial of service protection may include:",
+      "1. resource, connection, and account monitoring",
+      "2. application load balancing",
+      "3. soft account lockout",
+      "4. computing resource allocation restriction (allocate resources only when necessary and authorized)",
+      "5. controlled error handling."
+    ],
+    "note": "Denial of service attacks include resource exhaustion, account lock out, application level connection/request flooding, corruption of data structures, and exception processing.",
+    "references": "NIST SP 800-53 SC-5"
+  },
+  {
+    "_id": "AS 1.7.2",
+    "control_id": "AS 1.7.2",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SC-5",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Validate application denial of service controls. An acceptable denial of service control validation is one of the following:",
+      "1. load testing; or",
+      "2. vulnerability scanning; or",
+      "3. penetration testing."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SC-5"
+  },
+  {
+    "_id": "AS 1.8.1",
+    "control_id": "AS 1.8.1",
+    "risk_area": "AS",
+    "classification_levels": ["III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SC-4, SC-8",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Ensure that applications protect Level III information during processing. Data protection techniques include:",
+      "1. data masking (concealing/obscuring restricted data elements data from improper access)",
+      "2. client-side encryption (encrypting data before transmission to the application using an encryption key known only by the client)",
+      "3. parameterizing database queries."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SC-4, SC-8"
+  },
+  {
+    "_id": "AS 1.9.1",
+    "control_id": "AS 1.9.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SA-22",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Implement and maintain vendor-supported software and firmware.",
+      "Verify software versions are supported and security patches are being released as needed.",
+      "Update or replace unsupported versions of software or software for which vendors refuse to mitigate vulnerabilities."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SA-22"
+  },
+  {
+    "_id": "AS 1.10.1",
+    "control_id": "AS 1.10.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 RA-5",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Complete a University-approved web application vulnerability scan prior to implementation to ensure that web application and/or service vulnerabilities are identified and managed. Web application vulnerability scans must:",
+      "1. measure vulnerability severity using the Common Vulnerability Scoring System (CVSS) to help determine urgency and priority of response.",
+      "2. be performed using a University-approved vulnerability scanning tool to detect:",
+      "   a. web authorization vulnerabilities",
+      "   b. session tracking vulnerabilities",
+      "   c. input form processing vulnerabilities (e.g., injection, buffer overflow, or cross-site scripting)",
+      "   d. web server software flaws or improper configurations.",
+      "Update vulnerability databases and the vulnerability scanning engine weekly."
+    ],
+    "note": "Vulnerability remediation requirements are defined in security control SC 3.3.1 (p. 89) and security control SC 3.4.1 (p. 90).",
+    "references": "NIST SP 800-53 RA-5"
+  },
+  {
+    "_id": "AS 2.1.1",
+    "control_id": "AS 2.1.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SA-3, SA-15; Secure UD Compliance and Risk Survey question #11",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Develop, implement, and maintain a formal software development process. The software development process must:",
+      "1. include information security considerations at appropriate points throughout the software development lifecycle",
+      "2. define information security roles and responsibilities and assign those roles to employees."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 SA-3, SA-15; Secure UD Compliance and Risk Survey question #11"
+  },
+  {
+    "_id": "AS 2.1.2",
+    "control_id": "AS 2.1.2",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 RA-2; University Information Classification Policy; Secure UD Compliance and Risk Survey question #11",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Classify application data according to University policy.",
+      "Submit data classifications to the project team and the unit head for review and approval at the beginning of the software development lifecycle."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 RA-2; University Information Classification Policy; Secure UD Compliance and Risk Survey question #11"
+  },
+  {
+    "_id": "AS 2.1.3",
+    "control_id": "AS 2.1.3",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CA-2, SA-15; Secure UD Compliance and Risk Survey question #11",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Develop, implement, and maintain a system security plan for all new or upgraded information systems. The system security plan must:",
+      "1. identify application security requirements based on the Secure UD Data Governance & Security Program",
+      "2. identify security controls in place or planned for meeting those requirements during the architecture or design phase(s) of the software development process",
+      "3. identify remediation plans and implementation timelines for addressing security issues identified during the software development process.",
+      "Submit the system security plan to the project team and the unit head for review and approval before the system is deployed into production."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CA-2, SA-15; Secure UD Compliance and Risk Survey question #11"
+  },
+  {
+    "_id": "AS 2.1.4",
+    "control_id": "AS 2.1.4",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 SA-11, SA-15",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Complete a peer code review during the system development process for all new or upgraded information systems. Peer code reviews must check application security controls to verify the controls are implemented correctly, operating as intended, and producing the desired outcome with respect to meeting the requirements of the system security plan and the Secure UD Data Governance & Security Program.",
+      "Submit peer code review results to the project team and the unit head for review and approval before the system is deployed into production."
+    ],
+    "note": "Minimally, all information systems must be reviewed before being deployed into production.",
+    "references": "NIST SP 800-53 SA-11, SA-15"
+  },
+  {
+    "_id": "AS 2.1.5",
+    "control_id": "AS 2.1.5",
+    "risk_area": "AS",
+    "classification_levels": ["III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CA-2, SA-15",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Implement security controls in non-production environments to protect Level III information during processing, storage, and transmission. Security controls include:",
+      "1. using non-routable development environments accessible only from on-campus or VPN connections."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CA-2, SA-15"
+  },
+  {
+    "_id": "AS 2.2.1",
+    "control_id": "AS 2.2.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CM-3",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Develop, implement, and maintain a formal change management process to control the software development process. The change management process must:",
+      "1. determine the types of changes to applications or the software development processes that are subject to change management",
+      "2. evaluate proposed changes with explicit consideration of the security impact",
+      "3. approve or disapprove proposed changes",
+      "4. implement only approved changes",
+      "5. remove or disable functionality that allows the bypass of security controls prior to implementation in a staging or production environment",
+      "6. document change management decisions, retaining change management records according to records retention schedules."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CM-3"
+  },
+  {
+    "_id": "AS 2.2.2",
+    "control_id": "AS 2.2.2",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CM-3",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Complete tests of approved changes to applications before implementing them in the production environment.",
+      "1. Test proposed changes to critical or mission critical applications in a separate test environment.",
+      "Submit test results to the project team and the unit head for review and approval before the approved change is deployed into production."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CM-3"
+  },
+  {
+    "_id": "AS 2.3.1",
+    "control_id": "AS 2.3.1",
+    "risk_area": "AS",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CA-9",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Data Steward",
+    "requirements": [
+      "Ensure that applications that access the University's network or University information document and receive authorization for application data access. Application data access documentation must include:",
+      "1. the type of data to be accessed",
+      "2. the classifications of the data to be accessed",
+      "3. the application interface characteristics",
+      "4. a data flow diagram",
+      "5. the endpoint connections (for network access).",
+      "Update application data access documentation when applications are modified or upgraded.",
+      "Submit application data access documentation to the project team and the data steward of the requested data for review and approval."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CA-9"
+  }
+]
