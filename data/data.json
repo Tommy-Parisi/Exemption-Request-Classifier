@@ -756,5 +756,167 @@
     ],
     "note": null,
     "references": "NIST SP 800-53 CA-9"
+  },
+  {
+    "_id": "CP 1.1.1",
+    "control_id": "CP 1.1.1",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-2; Secure UD Compliance and Risk Survey question #12",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Develop, implement, and maintain a business continuity plan. The business continuity plan must:",
+      "1. include a business impact analysis. A business impact analysis defines:",
+      "   a. business priorities (critical or mission critical business processes)",
+      "   b. business dependencies (critical or mission critical IT resources or other business processes)",
+      "   c. maximum allowable disruption (how long the unit can operate without a given critical or mission critical business process before suffering a significant consequence).",
+      "2. identify recovery roles and responsibilities and assign those roles to University staff",
+      "3. identify contact information for critical or mission critical employees, departments, agencies, and/or vendors",
+      "4. identify strategies to maintain or recover essential business processes and functions under each of the following conditions:",
+      "   a. A significant disruption, compromise, or failure of the information system(s) needed to support essential business processes and functions has occurred.",
+      "   b. Work space(s) are rendered unavailable for a period long enough to significantly impact essential business processes and functions.",
+      "   c. A number of employees are unavailable for a period long enough to significantly impact essential business processes and functions.",
+      "Update the business continuity plan annually or after unit or technological changes."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CP-2; Secure UD Compliance and Risk Survey question #12"
+  },
+  {
+    "_id": "CP 1.1.2",
+    "control_id": "CP 1.1.2",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-4; Secure UD Compliance and Risk Survey question #13",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Complete a business continuity test or review annually to determine the effectiveness of the business continuity plan and the organizational readiness to execute the plan. An acceptable business continuity test or review is one of the following:",
+      "1. checklist test; or",
+      "2. structured walkthrough; or",
+      "3. simulation; or",
+      "4. actual disruptive event.",
+      "Update the business continuity plan after testing or review as necessary."
+    ],
+    "note": "Checklist test—A test in which a plan or procedure is reviewed to ensure accuracy and consistency.\nStructured walkthrough—A test in which a plan or procedure is reviewed step by step with the individuals responsible for its execution to ensure accuracy and consistency.\nSimulation—A test in which a plan or procedure is executed during a mock disruptive event to ensure its function.\nDisruptive event—An event that requires the execution of a plan or procedure to recover from operational loss.",
+    "references": "NIST SP 800-53 CP-4; Secure UD Compliance and Risk Survey question #13"
+  },
+  {
+    "_id": "CP 2.1.1",
+    "control_id": "CP 2.1.1",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": 49,
+    "nist_reference": "NIST SP 800-53 CP-10",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Develop, implement, and maintain a data center disaster recovery plan. The disaster recovery plan must define:",
+      "1. critical or mission critical IT resources",
+      "2. recovery point objective (RPO)",
+      "3. recovery time objective (RTO)",
+      "4. IT recovery roles and responsibilities and the University employees assigned to those roles",
+      "5. contact information for critical or mission critical IT employees, departments, agencies, and/or vendors.",
+      "Update the disaster recovery plan annually or after unit or technological changes."
+    ],
+    "note": "IT maintains and tests a disaster recovery plan for central IT resources. Unit disaster recovery plans may not be necessary.\nBusiness priority (critical or mission critical business process) requirements are defined in security control CP 1.1.1 (p. 47).\nRecovery point objective—The targeted maximum time period for which data might be lost as a result of a disruptive event before incurring unacceptable consequences associated with a break in business continuity. Simplified: the acceptable extent of data loss due to a disruptive event.\nRecovery time objective—The targeted duration of time and degree of business function resumption required following a disruptive event to avoid unacceptable consequences associated with a break in business continuity. Simplified: the acceptable duration of downtime following a disruptive event.",
+    "references": "NIST SP 800-53 CP-10"
+  },
+  {
+    "_id": "CP 2.1.2",
+    "control_id": "CP 2.1.2",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-4",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Conduct a data center disaster recovery test or review annually. An acceptable disaster recovery test or review is one of the following:",
+      "1. checklist test; or",
+      "2. structured walkthrough; or",
+      "3. simulation; or",
+      "4. actual disruptive event.",
+      "Update the disaster recovery plan after testing or review as necessary."
+    ],
+    "note": "IT maintains and tests a disaster recovery plan for central IT resources. Unit disaster recovery plans may not be necessary.\nChecklist test—A test in which a plan or procedure is reviewed to ensure accuracy and consistency.\nStructured walkthrough—A test in which a plan or procedure is reviewed step by step with the individuals responsible for its execution to ensure accuracy and consistency.\nSimulation—A test in which a plan or procedure is executed during a mock disruptive event to ensure its function.\nDisruptive event—An event that requires the execution of a plan or procedure to recover from operational loss.",
+    "references": "NIST SP 800-53 CP-4"
+  },
+  {
+    "_id": "CP 2.2.1",
+    "control_id": "CP 2.2.1",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-9; Secure UD Compliance and Risk Survey question #14",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Develop, implement, and maintain a backup plan consistent with the unit's recovery point objective (RPO) and recovery time objective (RTO). The backup plan must define:",
+      "1. the institutional and system data that requires backup",
+      "2. the frequency with which backup copies are to be made.",
+      "Update the backup plan annually or after unit or technological changes.",
+      "Submit the backup plan to the unit head for review and approval after each update."
+    ],
+    "note": "The Secure UD Security Plan Tool includes guidance and a template for creating a backup plan.\nRTO and RPO requirements are defined in security control CP 2.1.1 (p. 49).\nRecovery point objective—The targeted maximum time period for which data might be lost as a result of a disruptive event before incurring unacceptable consequences associated with a break in business continuity. Simplified: the acceptable extent of data loss due to a disruptive event.\nRecovery time objective—The targeted duration of time and degree of business function resumption required following a disruptive event to avoid unacceptable consequences associated with a break in business continuity. Simplified: the acceptable duration of downtime following a disruptive event.",
+    "references": "NIST SP 800-53 CP-9; Secure UD Compliance and Risk Survey question #14"
+  },
+  {
+    "_id": "CP 2.2.2",
+    "control_id": "CP 2.2.2",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-9; Secure UD Compliance and Risk Survey question #14",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Complete backups consistent with the unit backup plan.",
+      "Monitor backup logs to ensure that backups are completed as expected without warnings or errors.",
+      "Maintain a media inventory to track the location of backup data."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CP-9; Secure UD Compliance and Risk Survey question #14"
+  },
+  {
+    "_id": "CP 2.2.3",
+    "control_id": "CP 2.2.3",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-9(1); Secure UD Compliance and Risk Survey question #15",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Unit Head",
+    "requirements": [
+      "Complete a test of backup media and systems annually or after technological changes to verify media reliability and information integrity.",
+      "Submit backup test results to the unit head for review and approval."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 CP-9(1); Secure UD Compliance and Risk Survey question #15"
+  },
+  {
+    "_id": "CP 2.2.4",
+    "control_id": "CP 2.2.4",
+    "risk_area": "CP",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CP-9",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require that critical and mission critical backup copies be stored in a separate facility or in a fire-rated container that is not colocated with the operational system."
+    ],
+    "note": "This security control applies to all critical or mission critical backups irrespective of their classification(s). Criticality is addressed in \"Information criticality\" (p. 12).",
+    "references": "NIST SP 800-53 CP-9"
   }
 ]
