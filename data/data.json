@@ -1,0 +1,70 @@
+[       
+        {
+                "control_id": "HR 1.1.1",
+                "risk_area": "HR",
+                "classification_level": ["I", "II", "III"],
+                "page_number": 64,
+                "nist_reference": "NIST SP 800-53 AT-1, AT-2, AT-2(2), AT-4; Secure UD Compliance and Risk Survey question #28",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                        "Provide employee end users of University information with University-approved information security awareness training annually.",
+                        "Document employee information security awareness training completion status.",
+                        "Ensure that information security training topics are addressed at staff meetings.",
+                        "Provide security awareness resources to assist employees in recognizing and reporting potential indicators of an insider threat."
+                ],
+                "recommendations": [
+                        "Require completion of University-approved security awareness training and include completion in employee performance appraisals."
+                ],
+                "note": "Provide employee information security awareness training to promote awareness training to promote awareness of security threats and best practices."
+        },
+        {
+                "control_id": "HR 1.2.1",
+                "risk_area": "HR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 64,
+                "nist_reference": "NIST SP 800-53 AT-1, PS-6; University Data Governance Policy; Secure UD End User Acknowledgement; Secure UD Compliance and Risk Survey question #29",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require all end users of University information to attest to the Secure UD End User Acknowledgement annually."
+                ],
+                "recommendations":[],
+                "note": "Employee attestation to the Secure UD End User Acknowledgement ensures annual reaffirmation of data handling and security responsibilities."
+        },
+        {
+                "control_id": "HR 2.1.1",
+                "risk_area": "HR",
+                "classification_levels": ["III"],
+                "page_number": 65,
+                "nist_reference": "NIST SP 800-53 PS-3; Secure UD Compliance and Risk Survey question #30",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require background checks for potential employees who would require access to Level III information."
+                ],
+                "recommendations":[],
+                "note": ""
+        },
+        {
+                "control_id": "HR 2.2.1",
+                "risk_area": "HR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 65,
+                "nist_reference": "NIST SP 800-53 PS-4, PS-5",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that IT resources are recovered from terminated and transferred employees.",
+                "Recoverable IT resources include: IT devices (e.g., University-owned network devices, information systems, laptop computers, or mobile devices), security access tokens (e.g., fobs) and physical access devices (e.g., keys and ID cards), and Level II and III University information.",
+                "Identify and report unrecovered IT resources to IT Security and Human Resources for investigation.",
+                "Reports must be filed within five business days past the termination date for voluntary terminations, and immediately for involuntary terminations."
+                ],
+                "note": "Ensures recovery of IT resources and data from terminated or transferred employees to prevent unauthorized access."
+        }
+
+]
