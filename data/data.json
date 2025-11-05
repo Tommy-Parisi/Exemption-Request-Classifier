@@ -918,5 +918,228 @@
     ],
     "note": "This security control applies to all critical or mission critical backups irrespective of their classification(s). Criticality is addressed in \"Information criticality\" (p. 12).",
     "references": "NIST SP 800-53 CP-9"
+  },
+  {
+    "_id": "DM 1.1.1",
+    "control_id": "DM 1.1.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 DM-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #16",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require that data be collected only if it is necessary to support University activities.",
+      "Review controls, rules, and procedures that ensure data is acquired only to support University activities."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 DM-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #16"
+  },
+  {
+    "_id": "DM 1.2.1",
+    "control_id": "DM 1.2.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AP-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #16",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Assess laws, regulations, and policies governing data acquisition including:",
+      "1. the Children’s Online Privacy Protection Act (COPPA)",
+      "2. human research informed consent",
+      "Ensure that data acquisition practices are in compliance with applicable laws, regulations, and policies.",
+      "Provide web data collection notices. (Technology service providers who collect data via website interfaces must post a customized privacy statement to notify visitors regarding the types and uses of data that is gathered and whether any third parties are involved.)"
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 AP-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #16"
+  },
+  {
+    "_id": "DM 2.1.1",
+    "control_id": "DM 2.1.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 UL-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #17",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require that data be used only",
+      "1. according to authorization",
+      "2. to support University activities.",
+      "Review controls, rules, and procedures that ensure data is used only to support University activities."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 UL-1; University Data Governance Policy; Secure UD Compliance and Risk Survey question #17"
+  },
+  {
+    "_id": "DM 2.2.1",
+    "control_id": "DM 2.2.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 UL-1; University Data Governance Policy; University Web Privacy Policy; Secure UD Compliance and Risk Survey question #17",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Assess laws, regulations, policies, and contracts governing data use.",
+      "Ensure that data is used only in accordance with applicable laws, regulations, policies, and contracts.",
+      "Provide web data privacy statements. (Technology service providers who collect data via website interfaces must post a customized privacy statement to notify users regarding the uses of data that is gathered and whether any third party entities are involved.)"
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 UL-1; University Data Governance Policy; University Web Privacy Policy; Secure UD Compliance and Risk Survey question #17"
+  },
+  {
+    "_id": "DM 3.1.1",
+    "control_id": "DM 3.1.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 RA-2; University Information Classification Policy",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Classify all University information according to University policy.",
+      "Update the University information classifications annually or after relevant legal, business process, or technological changes."
+    ],
+    "note": null,
+    "references": "NIST SP 800-53 RA-2; University Information Classification Policy"
+  },
+  {
+    "_id": "DM 3.2.1",
+    "control_id": "DM 3.2.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 PM-5, SE-1; University Information Security Policy; Secure UD Inventory Tool",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Inventory business processes and the data relevant to those processes. The inventory must include:",
+      "1. the business processes of the unit",
+      "2. the applications relevant to the business processes",
+      "3. the kinds of data relevant to the business processes",
+      "4. the classifications of the data relevant to the business processes.",
+      "Update the inventory annually or after unit or technological changes."
+    ],
+    "note": "IT inventories business processes and data on central IT resources.",
+    "references": "NIST SP 800-53 PM-5, SE-1; University Information Security Policy; Secure UD Inventory Tool"
+  },
+  {
+    "_id": "DM 3.2.2",
+    "control_id": "DM 3.2.2",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 CM-8, PM-5, SE-1; University Information Security Policy; Secure UD Inventory Tool; Secure UD Compliance and Risk Survey question #18",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Inventory IT devices. The inventory must include:",
+      "1. the IT device type",
+      "2. the classifications of the data processed or stored on the device",
+      "3. the criticality of the IT devices",
+      "4. the unique system identifier (serial number, device name, MAC address)",
+      "5. the operating system name and version",
+      "6. the asset owner/assigned user",
+      "7. the local support provider or system administrator",
+      "8. the physical location (or “mobile” for mobile devices)",
+      "9. the network location (IP address for non-mobile devices where possible)",
+      "10. date inventory item was last verified.",
+      "Update the inventory annually or after unit or technological changes."
+    ],
+    "note": "IT inventories central IT devices.",
+    "references": "NIST SP 800-53 CM-8, PM-5, SE-1; University Information Security Policy; Secure UD Inventory Tool; Secure UD Compliance and Risk Survey question #18"
+  },
+  {
+    "_id": "DM 3.2.3",
+    "control_id": "DM 3.2.3",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 PM-5; Secure UD Compliance and Risk Survey question #19, #20",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Complete quarterly scans of systems to identify unencrypted and/or at-risk Level III information. Scans must include:",
+      "1. desktop and laptop computers",
+      "2. network drives.",
+      "Manage instances of identified Level III information. Management includes:",
+      "1. removing identified Level III information from IT devices",
+      "2. encrypting identified Level III information on IT devices",
+      "3. adding identified Level III information to IT resource inventories",
+      "4. reclassifying IT devices to reflect changes in data inventories."
+    ],
+    "note": "IT scans central IT resources for instances of unencrypted and/or at-risk Level III information.",
+    "references": "NIST SP 800-53 PM-5; Secure UD Compliance and Risk Survey question #19, #20"
+  },
+  {
+    "_id": "DM 3.3.1",
+    "control_id": "DM 3.3.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 DM-1, DM-2; Secure UD Compliance and Risk Survey question #21",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Require that data be retained only for as long as necessary to fulfill an operational requirement.",
+      "Review controls, rules, and procedures to ensure that data is retained only for as long as necessary to fulfill an operational requirement.",
+      "Dispose of unnecessary data in a manner commensurate with its sensitivity."
+    ],
+    "note": "Data disposal requirements are defined in security standard DM 5.3 (p. 62).",
+    "references": "NIST SP 800-53 DM-1, DM-2; Secure UD Compliance and Risk Survey question #21"
+  },
+  {
+    "_id": "DM 3.4.1",
+    "control_id": "DM 3.4.1",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "NIST SP 800-53 AU-11, SI-12; Secure UD Compliance and Risk Survey question #21",
+    "is_exception_related": false,
+    "requires_approval": true,
+    "approver_role": "Data Trustee and University Archivist",
+    "requirements": [
+      "Complete a records management review annually or after unit, regulatory, or technological changes. The records management review must:",
+      "1. review the applicable University records retention schedules to determine if there have been any changes",
+      "2. assess if there have been any organizational, legal, regulatory, or technological changes that would affect the unit's record retention requirements",
+      "3. define procedures and practices for erasing and archiving data, taking into account laws, policies, regulations, and University needs",
+      "4. erase data when no longer necessary to fulfill an operational requirement or as required by law, regulation, or policy",
+      "5. verify that records are not being disposed of before the authorized disposition date",
+      "6. assess whether the unit needs to take action to be in compliance with all applicable record retention requirements.",
+      "Submit the records management review results to the unit’s data trustee and the University Archivist for review and approval."
+    ],
+    "note": "Data disposal requirements are defined in security standard DM 5.3 (p. 62).",
+    "references": "NIST SP 800-53 AU-11, SI-12; Secure UD Compliance and Risk Survey question #21"
+  },
+  {
+    "_id": "DM 3.4.2",
+    "control_id": "DM 3.4.2",
+    "risk_area": "DM",
+    "classification_levels": ["I", "II", "III"],
+    "page_number": null,
+    "nist_reference": "OSTP Public Access Memo (22 Feb. 2013); Secure UD Compliance and Risk Survey question #22",
+    "is_exception_related": false,
+    "requires_approval": false,
+    "approver_role": null,
+    "requirements": [
+      "Manage the accessibility of data. Management includes:",
+      "1. ensuring that data is stored in suitable data storage systems",
+      "2. ensuring that published research and underlying data is stored in accessible data storage systems",
+      "3. using only University accounts, not personal accounts, for University activities",
+      "4. restricting propagation of sensitive data (e.g., consolidate data on a secure system to minimize instances)."
+    ],
+    "note": "The use of only University accounts is important when the University has a legitimate interest in accessing University information for the continuity of University operations or missions.",
+    "references": "OSTP Public Access Memo (22 Feb. 2013); Secure UD Compliance and Risk Survey question #22"
   }
 ]
