@@ -1159,5 +1159,324 @@
     ],
     "note": "The use of only University accounts is important when the University has a legitimate interest in accessing University information for the continuity of University operations or missions.",
     "references": "OSTP Public Access Memo (22 Feb. 2013); Secure UD Compliance and Risk Survey question #22"
-  }
+  },
+       
+        {
+                "control_id": "HR 1.1.1",
+                "risk_area": "HR",
+                "classification_level": ["I", "II", "III"],
+                "page_number": 64,
+                "nist_reference": "NIST SP 800-53 AT-1, AT-2, AT-2(2), AT-4; Secure UD Compliance and Risk Survey question #28",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                        "Provide employee end users of University information with University-approved information security awareness training annually.",
+                        "Document employee information security awareness training completion status.",
+                        "Ensure that information security training topics are addressed at staff meetings.",
+                        "Provide security awareness resources to assist employees in recognizing and reporting potential indicators of an insider threat."
+                ],
+                "recommendations": [
+                        "Require completion of University-approved security awareness training and include completion in employee performance appraisals."
+                ],
+                "note": "Provide employee information security awareness training to promote awareness training to promote awareness of security threats and best practices."
+        },
+        {
+                "control_id": "HR 1.2.1",
+                "risk_area": "HR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 64,
+                "nist_reference": "NIST SP 800-53 AT-1, PS-6; University Data Governance Policy; Secure UD End User Acknowledgement; Secure UD Compliance and Risk Survey question #29",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require all end users of University information to attest to the Secure UD End User Acknowledgement annually."
+                ],
+                "recommendations":[],
+                "note": "Employee attestation to the Secure UD End User Acknowledgement ensures annual reaffirmation of data handling and security responsibilities."
+        },
+        {
+                "control_id": "HR 2.1.1",
+                "risk_area": "HR",
+                "classification_levels": ["III"],
+                "page_number": 65,
+                "nist_reference": "NIST SP 800-53 PS-3; Secure UD Compliance and Risk Survey question #30",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require background checks for potential employees who would require access to Level III information."
+                ],
+                "recommendations":[],
+                "note": ""
+        },
+        {
+                "control_id": "HR 2.2.1",
+                "risk_area": "HR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 65,
+                "nist_reference": "NIST SP 800-53 PS-4, PS-5",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that IT resources are recovered from terminated and transferred employees.",
+                "Recoverable IT resources include: IT devices (e.g., University-owned network devices, information systems, laptop computers, or mobile devices), security access tokens (e.g., fobs) and physical access devices (e.g., keys and ID cards), and Level II and III University information.",
+                "Identify and report unrecovered IT resources to IT Security and Human Resources for investigation.",
+                "Reports must be filed within five business days past the termination date for voluntary terminations, and immediately for involuntary terminations."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "IA 1.1.1",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 66,
+                "nist_reference": "NIST SP 800-53 AC-14, IA-2; Secure UD Compliance and Risk Survey question #31, #44",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require authentication before granting access to IT resources. Authentication includes: 1. a password or passcode lock on an IT device. 2. a username and password requirement for applications and systems.",
+                "Require authentication before granting access to: 1. write Level I information 2. read or write Level II or Level III information"
+                ],
+                "recommendations": [],
+                "note": "Read-only access to Level I information is unrestricted and does not require authentication."
+        },
+        {
+                "control_id": "IA 1.1.2",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 66,
+                "nist_reference": "NIST SP 800-53 IA-2; Secure UD Compliance and Risk Survey question #32",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Implement and maintain authentication systems to authenticate access to IT resources. Authentication systems include:\n 1. University authentication systems (where practical, University authentication systems must be used)\n 2. University-approved authentication systems (only where implementation of University authentication systems is not possible or practical)",
+                "Require the use of University-approved authentication methods, including:\n 1. a password or passcode.\n 2. a second factor based on something the user has.\n 3. a biometric (e.g., fingerprint)"
+                ],
+                "recommendations": [],
+                "note": "This control applies to cloud services as well as University-owned or University-managed systems. University-approved---Either: required or permitted by a University contract; or approved by a unit head in the interests of facilitating the unit's administrative, operational, or technical ability to fulfill its missions."
+        },
+        {
+                "control_id": "IA 1.1.3",
+                "risk_area": "IA",
+                "classification_levels": ["II", "III"],
+                "page_number": 66,
+                "nist_reference": "NIST SP 800-53 IA-2",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require multi-factor authentication to IT resources where practical."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "IA 1.2.1",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 67,
+                "nist_reference": "NIST SP 800-53 AC-1, AC-2, AC-6, IA-4, PS-4, PS-5; Secure UD Compliance and Risk Survey question #33",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Develop, implement, and maintain a user account management process. The user account management process must include: \n1. granting accounts only to users for whom access to IT resources fulfills an operational requirement\n 2. assigning account identifiers that uniquely identify individuals\n   a. preventing the sharing of accounts\n 3. defining account roles and criteria for membership\n 4. identifying authorized users, group and role membership, and access authorizations (i.e., privileges) and other attributes (as required) for each account\n 5. updating account roles appropriately following account-related events:\n   a. personnel events that will affect staff account status (e.g., hiring, transfer, or termination)\n   b. academic events that will affect student account status (e.g., application, enrollment, or graduation)\n   c. events that will affect the status of other types of accounts\n   d. security incidents that compromise accounts and will require immediate action.\n 6. resetting the account only after verifying the user's identity\n 7. disabling and/or removing inactive or unnecessary accounts\n 8. requiring the use of only University accounts, not personal accounts, for University activities.",
+                "Review the account list at least annually."
+                ],
+                "recommendations": [],
+                "note": "University activities do not include those activities related to individual scholarship, research, or pedagogy. Account list reviews may be manual or automated. Shared accounts do not conform to the requirements of this security control. Shared accounts must be documented as exceptions, and they must be used only as necessary to fulfill an operational requirement. Exception requirements are addressed in security controls IS 2.1.2 (p.33). Separation of duties requirements are defined in security control AS 1.3.1 (p.40) and security control DM 4.3.1 (p.59)."
+        },
+        {
+                "control_id": "IA 1.2.2",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 68,
+                "nist_reference": "NIST SP 800-53 AC-2, AC-6; Secure UD Compliance and Risk Survey question #43",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Develop, implement, and maintain an administrator account management process. The administrator account management process must include:\n1. assigning administrator accounts only to specific employees for whom privileged access fulfills an operational requirement.\n2. using administrator accounts only for activities that require the use of an account with privileged access (e.g., prohibiting the use of administrator accounts to perform routine tasks that do not require privileged access such as reading email, general web browsing, etc.).\n3. restricting administrator account access and use to employees who have the requisite skills to use privileged access safely.\n4. disabling and/or removing inactive or unnecessary accounts.\n5. revoking access to administrator accounts when it is no longer necessary to fulfill an operational requirement.\n6. inventorying administrator accounts. The inventory must include:\n   a. all active administrator accounts.\n   b. all employees with access to each administrator account.",
+                "Submit the administrator account list to the unit head for review and approval at least annually."
+                ],
+                "recommendations": [],
+                "note": "Administrator accounts are accounts granted privileged access to system resources (e.g., the UNIX and MAC OS X 'root' account, the Windows 'administrator' account, database management system 'dba' accounts, and service accounts with elevated privilege). Whenever possible, users should not have access to administrator accounts on client systems. If required, separate administrator and user privileges should be used. Administrator account inventories must be maintained by system administrators. "
+        },
+        {
+                "control_id": "IA 1.3.1",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 69,
+                "nist_reference": "NIST SP 800-53 IA-5",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Require that passwords conform to University password guidelines wherever username and password authentication is employed. Passwords must:\n1. be between 12 and 30 characters in length.\n2. include at least three of the following character types:\n   a. uppercase letters.\n   b. lowercase letters.\n   c. numbers.\n   d. special characters (!, $, ?, etc.).\n3. not be easily guessable.",
+                "Manage password implementation. Management includes:\n1. ensuring that initial passwords are created only by the University and only after verifying the user's identity.\n2. ensuring that default vendor passwords are modified prior to implementation.\n3. ensuring that passwords are reset only after verifying the user's identity.\n4. ensuring that passwords are not stored in cleartext.\n5. denying access to password hashes.",
+                "Require that passwords not be shared between end users.",
+                "Require different passwords for user accounts and privileged accounts.",
+                "Require that University passwords not be used to authenticate to non-UD hosted services or resources.",
+                "Require that passwords be changed if compromised."
+                ],
+                "recommendations": [],
+                "note": "Password sharing for shared accounts does not conform to the requirements of this security control. Password sharing must be documented as an exception, and passwords must be shared only as necessary to fulfill an operational requirement. Exception requirements are addressed in security control IS 2.1.2 (p.33)."
+        },
+        {
+                "control_id": "IA 1.4.1",
+                "risk_area": "IA",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 69,
+                "nist_reference": "NIST SP 800-53 AC-7",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that information systems protect against unlimited consecutive invalid login attempts. Invalid login protection mechanisms include:\n1. soft account locks: locking accounts automatically when a threshold of consecutive invalid login attempts has been exceeded, using:\n   a. a lockout threshold of 10 invalid login attempts.\n   b. a duration of 10 minutes to limit the impact of denial of service attacks.\n2. out-of-band signaling: sending some message or code outside of the information system to assist in authentication (e.g., an authentication code sent via SMS).\n3. detective logging and response."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "IA 1.4.2",
+                "risk_area": "IA",
+                "classification_levels": ["II", "III"],
+                "page_number": 70,
+                "nist_reference": "NIST SP 800-53 AC-11, IA-11",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Configure systems to suspend inactive authenticated sessions after a period of inactivity. Session suspensions must:\n1. prevent further access to the system.\n2. be enforced after one of the following conditions:\n   a. 15 minutes of inactivity for client systems and server systems.\n   b. 5 minutes of inactivity for mobile devices\n   c. an interval of inactivity commensurate with sensitivity for applications\n   d. a request from the user.\n3. persist until the user renews access using established identification and authentication procedures."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "IR 1.1.1",
+                "risk_area": "IR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 71,
+                "nist_reference": "NIST SP 800-53 IR-1, IR-4, IR-5, IR-8; University Incident Response Policy; Secure UD Compliance and Risk Survey question #34",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Develop, implement, and maintain an incident response plan. The incident response plan must:\n1. define reportable incidents.\n2. define the steps to be taken to respond to an incident.\n3. define roles and responsibilities for incident response.",
+                "Update the incident response plan annually, after major unit or technological changes, or in response to problems encountered during plan implementation."
+                ],
+                "recommendations": [],
+                "note": "University incident response procedures are addressed in the University Incident Response Policy. The Secure UD Security Plan Tool includes guidance and a template for creating a unit incident response plan."
+        },
+        {
+                "control_id": "IR 1.1.2",
+                "risk_area": "IR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 71,
+                "nist_reference": "NIST SP 800-53 IR-1, IR-4, IR-5, IR-8; University Incident Response Policy",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Develop, implement, and maintain an incident response capability that is consistent with the incident response plan. The incident response plan must describe the structure of the incident response capability in terms of role(s) and resources."
+                ],
+                "recommendations": [],
+                "note": "Incident response plan requirements are defined in security control 1.1.1 (p.71)."
+        },
+        {
+                "control_id": "IR 1.2.1",
+                "risk_area": "IR",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 72,
+                "nist_reference": "NIST SP 800-53 IR-1, IR-6; University Incident Response Policy",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Report suspected or actual incidents promptly according to the process defined in University Incident Response Policy.\n1. In the event that a user suspects that an incident may have occurred or may be imminent, the user must report the incident to the local support provider.\n2. The local support provider muser report the incident to IT Security.\n3. If a computer has been stolen, the local support provider msut notify Public Safety."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "PE 1.1.1",
+                "risk_area": "PE",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 73,
+                "nist_reference": "NIST SP 800-53 PE-1, PE-2, PE-3, PE-5, PE-6, PE-8; Secure UD Compliance and Risk Survey question #35",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Implement, as required by the unit information security plan, controls to enforce authorized physical access to unit locations. Physical access controls may include:\n1. verifying that access is authorized prior to granting access to unit locations.\n2. controlling ingress/egress to unit locations using one or more University-approved physical access systems.\n3. providing access to public areas within the unit location.\n4. labeling nonpublic areas within the unit location as restricted to authorized personnel only.\n5. escorting visitors and monitoring visitor activity.\n6. securing keys, combinations, and other physical access devices.\n7. inventorying physical access devices annually."
+                ],
+                "recommendations": [],
+                "note": "Examples of ingress/egress controls include locking unit locations outside of operational hours. Physical access devices include keys, key cards, fobs, etc."
+        },
+        {
+                "control_id": "PE 1.1.2",
+                "risk_area": "PE",
+                "classification_levels": ["I", "II", "III"],
+                "page_number": 74,
+                "nist_reference": "NIST SP 800-53 PE-1, PE-2, PE-3, PE-5, PE-8",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Manage the use of the physical access controls at unit locations. Management of access controls includes:\n1. developing and maintaining a list of individuals with authorized access to unit locations by:\n   a. requesting issuance of physical access devices from the unit that controls the unit location's physical access system (e.g., Lock Shop, card access system administrator).\n   b. reviewing and approving semiannually the access list detailing authorized facility access by individuals.\n   c. requesting removal of individuals from the unit location access list when access is no longer necessary to fulfill an operational requirement.\n2. taking unit location access-related actions, including:\n   a. notifying the unit that controls the unit location's physical access system of security incidents that compromise building access and will require immediate action.\n   b. notifying management of compromised physical access devices.\n   c. notifying the unit's data trustee and the Department of Public Safety when master keys (or physical access devices affecting a large number of locks) have been compromised.\n   d. revoking access from magnetic stripe cards or other access tokens when they are compromised.\n   e. changing combinations and keys when they are compromised."
+                ],
+                "recommendations": [],
+                "note": "Physical access devices include key, key cards, fobs, etc. Approval of access lists must be granted by the unit head responsible for the unit locations to which they pertain."
+        },
+        {
+                "control_id": "PE 1.2.1",
+                "risk_area": "PE",
+                "classification_levels": ["III"],
+                "page_number": 74,
+                "nist_reference": "NIST SP 800-53 MP-5, PE-2, PE-3, PE-5",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that physical media is transported securely between facilities by:\n1. transporting physical media in a sealed or locked container (e.g., envelopes, bags, or cases).\n2. using authorized personnel to transport physical media."
+                ],
+                "recommendations": [],
+                "note": "Physical media includes documents or unencryptable electronic storage media. Electronic storage media---Any standalone or integrated electronic media that can be used to store data. Includes optical media, magnetic media, disk drives, and flash drives."
+        },
+        {
+                "control_id": "PE 1.3.1",
+                "risk_area": "PE",
+                "classification_levels": ["I","II","III"],
+                "page_number": 75,
+                "nist_reference": "NIST SP 800-53 MP-1, MP-4, PE-5; Secure UD Compliance and Risk Survey question #36",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that IT devices are used and stored securely by:\n1. physically locking IT devices kept in public areas to prevent unintentional, unlawful, or unauthorized removal\n2. storing IT devices in locked cabinets, desks, offices, or other access restricted space outside of business hours."
+                ],
+                "recommendations": [],
+                "note": ""
+        },
+        {
+                "control_id": "PE 1.3.2",
+                "risk_area": "PE",
+                "classification_levels": ["II","III"],
+                "page_number": 75,
+                "nist_reference": "NIST SP 800-53 MP-2; Secure UD Compliance and Risk Survey question #36",
+                "is_exception_related": false,
+                "requires_approval": false,
+                "approver_role": "",
+                "requirements": [
+                "Ensure that documents containing Level II or Level III information are used and stored securely by:\n1. storing documents in locked cabinets, desks, offices, or other access restricted space outside of business hours\n2. removing or protecting documents in publicly accessible spaces such as service counters or unattended office spaces colocated with publicly accessible areas."
+                ],
+                "recommendations": [],
+                "note": ""
+        }
 ]
