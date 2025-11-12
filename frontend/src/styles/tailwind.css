@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+/* ====== UD Theme Colors ====== */
+@theme {
+  --color-ud-blue: #00539b;
+  --color-ud-gold: #ffcd00;
+  --color-ud-dark: #003366;
+}
+
+/* ====== Base Layout ====== */
+.page {
+  @apply min-h-screen flex flex-col bg-gray-100;
+}
+
+.container {
+  @apply max-w-6xl mx-auto bg-white shadow-sm rounded-md mt-10 p-10;
+}
+
+/* ====== Header ====== */
+.header {
+  background-color: var(--color-ud-blue);
+  color: white;
+  @apply shadow-md;
+}
+
+/* --- Top Blue Bar with Logo --- */
+.header-top {
+  @apply flex items-center justify-between py-4 pr-12;
+  padding-left: 6rem; /* push logo inward */
+  position: relative;
+}
+
+/* --- Gold Divider --- */
+.header-top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1.5px;
+  background-color: var(--color-ud-gold);
+}
+
+/* --- Dark Blue Nav Bar --- */
+.header-nav {
+  background-color: var(--color-ud-dark);
+  @apply flex items-center text-sm font-medium text-white;
+  padding-left: 7rem;  /* push links inward */
+  padding-right: 3rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  column-gap: 3.5rem;  /* even spacing */
+}
+
+.header-link {
+  @apply hover:text-[var(--color-ud-gold)] transition;
+}
+
+/* ====== Form Controls ====== */
+.label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.input,
+.textarea {
+  @apply w-full border border-gray-300 rounded-lg p-3 text-[15px] focus:ring-[var(--color-ud-blue)] focus:border-[var(--color-ud-blue)] transition;
+}
+
+.textarea {
+  @apply resize-none min-h-[130px];
+}
+
+/* ====== Headings ====== */
+.section-title {
+  @apply text-lg font-semibold text-gray-800 mb-3;
+}
+
+.breadcrumb {
+  @apply text-sm text-[var(--color-ud-blue)] mb-4;
+}
+
+/* ====== Definition Tables ====== */
+.ud-table {
+  @apply w-full border-collapse text-sm text-gray-800 mt-4;
+}
+
+.ud-table td {
+  @apply align-top;
+}
+
+/* --- Colored definition cells --- */
+.ud-cell-colored {
+  white-space: nowrap;
+  padding: 0.9em 1.25em;
+  width: 180px;           
+  min-width: 180px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 0;       
+  font-size: 0.9rem;      
+  line-height: 1.2;
+  height: 55px;
+  vertical-align: middle;
+}
+
+/* --- Description cells --- */
+.ud-cell-desc {
+  padding: 0.9em 1.25em;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* ====== Footer ====== */
+.footer {
+  @apply border-t-[3px] mt-10 bg-gray-50 text-center py-6 text-sm text-gray-600;
+  border-color: var(--color-ud-gold);
+}
+
+.footer img {
+  @apply h-12 w-auto mx-auto mb-2;
+}
+
+/* ====== Typography ====== */
+body {
+  font-family: "Open Sans", sans-serif;
+  background: rgb(243 244 246);
+}
+
+/* ====== Utility Fixes ====== */
+strong { @apply font-semibold; }
+p { @apply leading-relaxed; }
