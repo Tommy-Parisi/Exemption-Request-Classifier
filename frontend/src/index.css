@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* optional UD theme variables */
+@theme {
+  --color-udblue: #00539b;
+  --color-uddark: #003366;
+  --color-udgold: #ffb81c;
+}
