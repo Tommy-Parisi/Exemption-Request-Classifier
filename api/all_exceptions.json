@@ -1,0 +1,769 @@
+{
+    "customerId": 20,
+    "flowOccurrenceId": 189663429,
+    "flowOccurrencePId": "cb50c0fe-61d5-4c4c-a0b9-be4013ebf477",
+    "status": "Completed",
+    "userStatus": 0,
+    "data": [
+        {
+            "TicketID": 151542,
+            "CreatedDate": "2021-04-16T16:42:11.243Z",
+            "Title": "Cylance flagged components of Zoom on MacOS",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2021-09-21T03:54:52.337Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 180906,
+            "CreatedDate": "2021-06-24T18:23:25.297Z",
+            "Title": "Cylance is blocking parts of Zoom again",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2021-06-28T18:25:43.9Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 229103,
+            "CreatedDate": "2021-09-17T21:06:50.693Z",
+            "Title": "Request to upgrade & standardize 192 S. Chapel NE37 surveillance cameras systems",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-04-24T15:51:56.187Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 246498,
+            "CreatedDate": "2021-10-21T17:29:02.097Z",
+            "Title": "Exception for lm.udel.edu",
+            "AccountName": "IT-Research Cyberinfrastuctur",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-08-20T17:29:20.23Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 337559,
+            "CreatedDate": "2022-04-13T18:33:40.083Z",
+            "Title": "Test of workflow",
+            "AccountName": "IT Governance & Client Success",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2022-04-13T18:36:18.79Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 337564,
+            "CreatedDate": "2022-04-13T18:37:04.933Z",
+            "Title": "test 2 of workflow",
+            "AccountName": "IT Governance & Client Success",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2022-04-13T18:46:59.12Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 337588,
+            "CreatedDate": "2022-04-13T18:48:15.717Z",
+            "Title": "test 3",
+            "AccountName": "IT Governance & Client Success",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2022-04-13T18:52:16.117Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 337615,
+            "CreatedDate": "2022-04-13T19:13:38.507Z",
+            "Title": "test 4",
+            "AccountName": "IT Governance & Client Success",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-07-25T13:33:38.14Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 348790,
+            "CreatedDate": "2022-05-04T15:15:57.437Z",
+            "Title": "Access to Github from IAM Servers",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2022-05-04T15:50:22.22Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval of Security Policy Exception Request"
+        },
+        {
+            "TicketID": 353853,
+            "CreatedDate": "2022-05-13T15:51:23.74Z",
+            "Title": "NRP/PRP on-site hardware exemptions",
+            "AccountName": "IT-Research Cyberinfrastuctur",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2022-08-04T20:37:45.16Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 366335,
+            "CreatedDate": "2022-06-03T15:02:24.237Z",
+            "Title": "Allow SSH to git.physics.udel.edu-128.175.68.190 from NCAR and NERSC Networks",
+            "AccountName": "Physics & Astronomy",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2022-08-25T18:23:04.863Z",
+            "WorkflowCurrentStepNames": "Completed Risk Assessment Document attached to request"
+        },
+        {
+            "TicketID": 378599,
+            "CreatedDate": "2022-06-24T14:55:51.763Z",
+            "Title": "Facilities would like to investigate an IBM-delivered module (Service Request) that would expose Maximo to the internet. Maximo is currently behind VPN or campus network.",
+            "AccountName": "FACILITIES-MAINT & OP INFO SVC",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-06-24T12:26:11.883Z",
+            "WorkflowCurrentStepNames": "Legacy Workflow: SecOps Approval of Risk"
+        },
+        {
+            "TicketID": 399213,
+            "CreatedDate": "2022-07-27T15:35:40.977Z",
+            "Title": "Exception for whimsy.udel.edu",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-01-06T13:19:19.493Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 410286,
+            "CreatedDate": "2022-08-11T16:32:03.757Z",
+            "Title": "YAMM Activation for UD's Bookstore Notification to students",
+            "AccountName": "IT-Information Technologies",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-11-06T15:24:56.983Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 455524,
+            "CreatedDate": "2022-10-13T18:16:41.557Z",
+            "Title": "Allow UDP Traffic  on port 4242 for IP 128.175.14.20 to allow Nebula Lighthouse.",
+            "AccountName": "Physics & Astronomy",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-02-15T17:03:28.207Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 456148,
+            "CreatedDate": "2022-10-14T20:11:58.053Z",
+            "Title": "Exception for host-73-17.host.udel.edu",
+            "AccountName": "Agriculture and Natural Resour",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2025-05-02T23:27:54.04Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 457164,
+            "CreatedDate": "2022-10-17T14:47:56.893Z",
+            "Title": "Benjamin Jungfleisch CrowdStrike installation exception for their MacBook Pro and iMac",
+            "AccountName": "Physics & Astronomy",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2022-12-01T18:55:27.947Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 476683,
+            "CreatedDate": "2022-11-16T20:16:34.76Z",
+            "Title": "CrowdStrike Exception on testing lab computers",
+            "AccountName": "Mathematical Sciences",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-05-04T19:50:55.543Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 503065,
+            "CreatedDate": "2023-01-11T14:50:36.997Z",
+            "Title": "Old lab equipment requires Win7 for software/drivers to work",
+            "AccountName": "Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-03-06T19:22:16.623Z",
+            "WorkflowCurrentStepNames": "IT Security GRC risk assessment tasks, SecOps Review of Compensating Control"
+        },
+        {
+            "TicketID": 532523,
+            "CreatedDate": "2023-03-02T18:01:09.223Z",
+            "Title": "CrowdStrike Exemption",
+            "AccountName": "Ship & Marine Operations",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-08-01T13:10:31.49Z",
+            "WorkflowCurrentStepNames": "CISO approval of security exemption request"
+        },
+        {
+            "TicketID": 552827,
+            "CreatedDate": "2023-04-14T19:49:55.003Z",
+            "Title": "Mid-2010 iMac that cannot upgrade past OS 10.13.6",
+            "AccountName": "Ofc Educational Technology",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2023-10-18T19:28:06.743Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 560589,
+            "CreatedDate": "2023-04-29T02:54:09.007Z",
+            "Title": "Exception for ls2.nss.udel.edu",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2023-12-08T19:56:14.833Z",
+            "WorkflowCurrentStepNames": "IT Security GRC risk assessment tasks, SecOps Review of Compensating Control"
+        },
+        {
+            "TicketID": 560590,
+            "CreatedDate": "2023-04-29T03:02:08.67Z",
+            "Title": "Exception for weasel.nss.udel.edu",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-07-22T14:10:22.78Z",
+            "WorkflowCurrentStepNames": "CISO approval of security exemption request, Is there a need to notify a stakeholder to implement the exception?"
+        },
+        {
+            "TicketID": 560621,
+            "CreatedDate": "2023-04-29T14:19:15.31Z",
+            "Title": "Exception for ferret.nss.udel.edu",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-07-15T14:08:27.127Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 568418,
+            "CreatedDate": "2023-05-16T15:59:29.017Z",
+            "Title": "UD Macbook Pro needs to be sent out by Apple for repair",
+            "AccountName": "Ofc Educational Technology",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-06-08T14:48:55.5Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 584113,
+            "CreatedDate": "2023-06-21T13:32:07.307Z",
+            "Title": "Exception for vindhler.nss.udel.edu",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-03-08T16:28:34.013Z",
+            "WorkflowCurrentStepNames": "Completed Risk Assessment Document attached to request, IT Security GRC risk assessment tasks"
+        },
+        {
+            "TicketID": 589390,
+            "CreatedDate": "2023-06-29T14:41:49.17Z",
+            "Title": "Exception for NIS Servers",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-07-11T16:59:57.427Z",
+            "WorkflowCurrentStepNames": "CISO approval of security exemption request, SecOps Review of Compensating Control"
+        },
+        {
+            "TicketID": 601256,
+            "CreatedDate": "2023-07-21T15:51:37.47Z",
+            "Title": "Security exception to address storage of Level 3 data for CHEER 5-year Project",
+            "AccountName": "Disaster Research Center",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-04-21T15:13:27.573Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval of Security Policy Exception Request"
+        },
+        {
+            "TicketID": 603091,
+            "CreatedDate": "2023-07-25T14:50:48.867Z",
+            "Title": "Exception for www.hpc.udel.edu",
+            "AccountName": "IT-Research Cyberinfrastuctur",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-05-13T13:14:24.25Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 615947,
+            "CreatedDate": "2023-08-11T13:40:35.233Z",
+            "Title": "Requesting continued access for YAMM for the Bookstore for another academic year",
+            "AccountName": "Bookstore",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2023-09-20T15:02:39.503Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 710940,
+            "CreatedDate": "2024-01-16T14:22:09.87Z",
+            "Title": "Security Exception request for talonnew.facilities.udel.edu",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-05-21T13:00:18.517Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 711849,
+            "CreatedDate": "2024-01-17T16:49:51.587Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "IT Governance & Client Success",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-03-17T15:03:21.937Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 725820,
+            "CreatedDate": "2024-02-08T20:36:54.9Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-06-05T19:00:06.367Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 732091,
+            "CreatedDate": "2024-02-22T13:22:52.647Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2024-05-09T14:31:40.093Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 736078,
+            "CreatedDate": "2024-02-29T19:22:16.74Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Infrastructure & Architecture",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-04-21T15:13:22.303Z",
+            "WorkflowCurrentStepNames": "Unit Head Acceptance of Risk"
+        },
+        {
+            "TicketID": 739000,
+            "CreatedDate": "2024-03-07T20:11:16.493Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-05-05T14:22:04.593Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 769520,
+            "CreatedDate": "2024-05-13T19:12:18.377Z",
+            "Title": "Security Exception request for talonnew.facilities.udel.edu",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2024-05-21T13:00:37.133Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 772552,
+            "CreatedDate": "2024-05-20T13:13:01.96Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "NIIMBL",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-28T12:55:58.183Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 775621,
+            "CreatedDate": "2024-05-26T14:55:21.357Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "DE Geological Survey",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-12T12:05:51.117Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 783482,
+            "CreatedDate": "2024-06-11T14:40:21.943Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Physics & Astronomy",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-07-18T18:58:06.197Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        },
+        {
+            "TicketID": 797242,
+            "CreatedDate": "2024-07-15T15:49:08.727Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Bookstore",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Awaiting Client Info",
+            "LastModifiedDate": "2025-10-17T12:39:04.547Z",
+            "WorkflowCurrentStepNames": "Unit Head Acceptance of Risk"
+        },
+        {
+            "TicketID": 806056,
+            "CreatedDate": "2024-07-29T15:55:07.173Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "DE Biotechnology Institute DBI",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-12T13:11:25.48Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 811427,
+            "CreatedDate": "2024-08-07T14:10:21.44Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "CAS IT",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-04-21T15:13:23.603Z",
+            "WorkflowCurrentStepNames": "CISO approval of security exemption request"
+        },
+        {
+            "TicketID": 812816,
+            "CreatedDate": "2024-08-09T13:48:23.07Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "CAS IT",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-13T14:00:53.467Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 814781,
+            "CreatedDate": "2024-08-13T16:43:06.903Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-05-05T14:22:10.037Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 816080,
+            "CreatedDate": "2024-08-14T19:46:35.39Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Univ Development",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-10-22T12:27:43.293Z",
+            "WorkflowCurrentStepNames": "Unit Head Acceptance of Risk"
+        },
+        {
+            "TicketID": 816094,
+            "CreatedDate": "2024-08-14T20:02:12.12Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-05-09T13:32:58.47Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        },
+        {
+            "TicketID": 821145,
+            "CreatedDate": "2024-08-22T14:07:43.26Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Mechanical Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2025-07-14T09:41:59.143Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 824111,
+            "CreatedDate": "2024-08-26T17:23:43.177Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "School of Education",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-29T17:55:24.957Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 835805,
+            "CreatedDate": "2024-09-12T19:57:30.747Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-05T14:21:53.39Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 852408,
+            "CreatedDate": "2024-10-16T14:45:37.057Z",
+            "Title": "Crowdstrike exceptions - Library 'frozen' public systems",
+            "AccountName": "Library",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-03-13T14:05:49.697Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 853313,
+            "CreatedDate": "2024-10-17T20:20:44.21Z",
+            "Title": "Remove additional approval for PeopleSoft Wire Transfer",
+            "AccountName": "Procurement Services",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-01-06T17:37:26.107Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 860482,
+            "CreatedDate": "2024-11-01T16:04:15.58Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "IT-Research Cyberinfrastuctur",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-01-30T14:42:12.17Z",
+            "WorkflowCurrentStepNames": "SecOps Review of Compensating Control, Wait for risk initial assessment"
+        },
+        {
+            "TicketID": 863232,
+            "CreatedDate": "2024-11-07T21:47:21.5Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-07-24T14:19:07.413Z",
+            "WorkflowCurrentStepNames": "Unit Head Acceptance of Risk"
+        },
+        {
+            "TicketID": 867270,
+            "CreatedDate": "2024-11-18T15:21:42.293Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Library",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-08-27T12:54:49.427Z",
+            "WorkflowCurrentStepNames": "Implement Security Exception"
+        },
+        {
+            "TicketID": 876193,
+            "CreatedDate": "2024-12-09T16:05:05.183Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "DE Biotechnology Institute DBI",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-05-05T14:22:01.323Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 877984,
+            "CreatedDate": "2024-12-11T18:37:22.757Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Civil Constrctn & Environ Engr",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Awaiting Client Info",
+            "LastModifiedDate": "2025-07-02T19:15:30.483Z",
+            "WorkflowCurrentStepNames": "Implement Security Exception"
+        },
+        {
+            "TicketID": 881608,
+            "CreatedDate": "2024-12-19T19:47:27.447Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Enterprise Systems",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-05-05T14:17:41.867Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 900840,
+            "CreatedDate": "2025-02-05T19:20:02.857Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Student Centers",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2025-02-19T19:51:56.767Z",
+            "WorkflowCurrentStepNames": "IT Security GRC risk assessment tasks, SecOps Review of Compensating Control"
+        },
+        {
+            "TicketID": 931719,
+            "CreatedDate": "2025-04-10T20:30:05.74Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "CAS IT",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-05-09T13:54:31.823Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 964908,
+            "CreatedDate": "2025-06-12T19:21:12.067Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-09-22T12:08:34.977Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 964918,
+            "CreatedDate": "2025-06-12T19:33:32.493Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Engineering",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-10-26T00:06:27.883Z",
+            "WorkflowCurrentStepNames": "Request Security Policy Exception Renewal?, Wait 30 days"
+        },
+        {
+            "TicketID": 970635,
+            "CreatedDate": "2025-06-25T19:04:32.387Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "DE Biotechnology Institute DBI",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "In Process",
+            "LastModifiedDate": "2025-10-24T00:16:49.083Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        },
+        {
+            "TicketID": 973067,
+            "CreatedDate": "2025-07-01T15:58:21.833Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "CAS IT",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Cancelled",
+            "LastModifiedDate": "2025-07-22T18:02:29.95Z",
+            "WorkflowCurrentStepNames": null
+        },
+        {
+            "TicketID": 974491,
+            "CreatedDate": "2025-07-03T20:40:05.08Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Computer & Info Sciences",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-11-13T01:49:58.84Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 986743,
+            "CreatedDate": "2025-07-28T16:18:37.377Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "CAS IT",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-08-26T18:19:44.483Z",
+            "WorkflowCurrentStepNames": "Unit Head Acceptance of Risk"
+        },
+        {
+            "TicketID": 988691,
+            "CreatedDate": "2025-07-30T20:39:53.07Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Lerner Colg of Bus & Econ",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-10-22T12:38:17.903Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires, Wait 30 days"
+        },
+        {
+            "TicketID": 990991,
+            "CreatedDate": "2025-08-04T18:44:00.43Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "University Printing",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-10-03T19:34:43.027Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        },
+        {
+            "TicketID": 991719,
+            "CreatedDate": "2025-08-05T18:04:28.55Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Greek Leadership & Learning",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-11-10T00:05:30.583Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 991746,
+            "CreatedDate": "2025-08-05T18:22:04.18Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Greek Leadership & Learning",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-08-11T18:05:30.803Z",
+            "WorkflowCurrentStepNames": "This task will wait until 30 days before exception expires"
+        },
+        {
+            "TicketID": 997477,
+            "CreatedDate": "2025-08-14T21:10:14.697Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Electrical and Computer Engrg",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Closed",
+            "LastModifiedDate": "2025-10-21T00:11:59.363Z",
+            "WorkflowCurrentStepNames": "Request Security Policy Exception Renewal?, Wait 30 days"
+        },
+        {
+            "TicketID": 1019629,
+            "CreatedDate": "2025-09-16T15:12:18.457Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Library",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "In Process",
+            "LastModifiedDate": "2025-09-16T15:16:30.147Z",
+            "WorkflowCurrentStepNames": "GRC Risk Assessment and Approval of Exception Request"
+        },
+        {
+            "TicketID": 1019927,
+            "CreatedDate": "2025-09-16T19:00:54.187Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "NIIMBL",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "Customer Responded",
+            "LastModifiedDate": "2025-10-06T18:56:01.36Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        },
+        {
+            "TicketID": 1024559,
+            "CreatedDate": "2025-09-25T17:20:05.417Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "DE Biotechnology Institute DBI",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-09-25T17:20:40.673Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 1028232,
+            "CreatedDate": "2025-10-02T15:50:17.18Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "IT-Information Security",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "On Hold",
+            "LastModifiedDate": "2025-10-02T15:50:50.467Z",
+            "WorkflowCurrentStepNames": "Unit Head Approval to begin Security Policy Exception Request"
+        },
+        {
+            "TicketID": 1045777,
+            "CreatedDate": "2025-11-06T16:23:37.237Z",
+            "Title": "Security Policy Exception Request",
+            "AccountName": "Ctr Rsch Educ & Social Policy",
+            "ServiceName": "Security Policy Exception Request",
+            "StatusName": "In Process",
+            "LastModifiedDate": "2025-11-06T19:26:54.603Z",
+            "WorkflowCurrentStepNames": "SepOps Risk Assessment and Approval of Security Exception Request"
+        }
+    ]
+}
