@@ -27,6 +27,7 @@ function App() {
     userImpact: "",
     universityImpact: "",
     mitigation: "",
+    attachment: null,
   });
 
   const [response, setResponse] = useState("");
@@ -151,6 +152,37 @@ function App() {
                 Risk Assessment Justification <span className="text-red-500">*</span>
               </label>
               <textarea name="riskAssessment" value={formData.riskAssessment} onChange={handleChange} className="textarea h-28" />
+            </div>
+
+            {/* ===== ATTACHMENT FIELD ===== */}
+            <div className="attachment-section">
+              <label className="label flex items-center gap-2">
+                Attachment
+                <span className="text-blue-500 cursor-pointer" title="File attachments associated with the ticket."></span>
+              </label>
+
+              <p className="text-sm text-gray-600 mb-2">
+                File attachments associated with the ticket.
+              </p>
+
+              <div className="attachment-wrapper">
+                <label className="browse-btn">
+                  Browse...
+                  <input
+                    type="file"
+                    name="attachment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      setFormData({ ...formData, attachment: file || null });
+                    }}
+                  />
+                </label>
+
+                <span className="file-name">
+                  {formData.attachment ? formData.attachment.name : "No file chosen"}
+                </span>
+              </div>
             </div>
 
             {/* ===== DATA LEVELS ===== */}
