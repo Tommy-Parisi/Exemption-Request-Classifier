@@ -77,11 +77,7 @@ def rerun(reply, message, history, feedback):
     return response.choices[0].message.content
 
 def chat(message, history):
-    if "patent" in message:
-        system = system_prompt + "\n\nEverything in your reply needs to be in pig latin - \
-              it is mandatory that you respond only and entirely in pig latin"
-    else:
-        system = system_prompt
+    system = system_prompt
     messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
     response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
     reply =response.choices[0].message.content
