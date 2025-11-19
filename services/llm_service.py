@@ -58,15 +58,26 @@ def evaluator_user_prompt(reply, message, history):
     user_prompt += "Please evaluate the response, replying with whether it is acceptable and your feedback."
     return user_prompt
 
+gemini_api_key = os.getenv("GOOGLE_API_KEY_2")
+if not gemini_api_key:
+    raise ValueError("GOOGLE_API_KEY_2 environment variable is required for Gemini access.")
+
 gemini = OpenAI(
-    api_key=os.getenv("GOOGLE_API_KEY_2"), 
+    api_key=gemini_api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
+
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.0-pro-exp")
+GEMINI_EVAL_MODEL = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 def evaluate(reply, message, history) -> Evaluation:
 
     messages = [{"role": "system", "content": evaluator_system_prompt}] + [{"role": "user", "content": evaluator_user_prompt(reply, message, history)}]
-    response = gemini.beta.chat.completions.parse(model="gemini-2.0-flash", messages=messages, response_format=Evaluation)
+    response = gemini.beta.chat.completions.parse(
+        model=GEMINI_EVAL_MODEL,
+        messages=messages,
+        response_format=Evaluation,
+    )
     return response.choices[0].message.parsed
 
 # Test code (commented out - uncomment to test evaluation)
@@ -80,7 +91,7 @@ def rerun(reply, message, history, feedback):
     updated_system_prompt += f"## Your attempted answer:\n{reply}\n\n"
     updated_system_prompt += f"## Reason for rejection:\n{feedback}\n\n"
     messages = [{"role": "system", "content": updated_system_prompt}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
     return response.choices[0].message.content
 
 
@@ -145,8 +156,8 @@ def get_system_prompt_with_form_data(form_data: dict = None) -> str:
 def chat(message, history):
     system = system_prompt
     messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
-    reply =response.choices[0].message.content
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
+    reply = response.choices[0].message.content
 
     evaluation = evaluate(reply, message, history)
     
@@ -167,7 +178,7 @@ def chat_with_form_data(message: str, form_data: dict = None, history: list = No
     system = get_system_prompt_with_form_data(form_data)
     
     messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
     reply = response.choices[0].message.content
 
     evaluation = evaluate(reply, message, history)
