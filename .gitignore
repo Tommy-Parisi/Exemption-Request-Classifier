@@ -1,8 +1,11 @@
 __pycache__
 .env
+myenv/
 
 # Ticket Data
-all_exceptions.json
-individual_exceptions
-exceptions_attachment_*.json
-exceptions.json
+api/all_exceptions.json
+api/individual_exceptions
+api/exceptions_attachment_*.json
+api/exceptions.json
+api/all_tickets.json
+
