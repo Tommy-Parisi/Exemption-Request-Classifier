@@ -1,0 +1,301 @@
+Approval Score: 
+Greater than 90: recommend approval
+Between 90 and 16: Requires review
+Under 16: recommend denied      
+        
+        {
+          "Comment":"Level of data",
+          "ID": 5126,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10895,
+              "Sum": 10
+            },
+            {
+              "When": 10896,
+              "Sum": 7
+            },
+            {
+              "When": 10897,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"Data encrypted in transit",
+          "ID": 5128,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10920,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"Data encrypted at rest",
+          "ID": 5129,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10922,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"Level of data access",
+          "ID": 5130,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10924,
+              "Sum": 10
+            },
+            {
+              "When": 10925,
+              "Sum": 7
+            },
+            {
+              "When": 10926,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"access Data encrypted in transit",
+          "ID": 5132,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10949,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"access Data encrypted in transit",
+          "ID": 5133,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10951,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"Allow Vulnerability Scanning Agent on Client",
+          "ID": 5134,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10953,
+              "Sum": 5
+            }
+          ]
+        },
+        {
+          "Comment":"Allow EDR (Crowdstrike on Client)",
+          "ID": 5135,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10955,
+              "Sum": 5
+            }
+          ]
+        },
+        {
+          "Comment":"Local firewall rules",
+          "ID": 5146,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10995,
+              "Sum": 10
+            },
+            {
+              "When": 10996,
+              "Sum": 7
+            },
+            {
+              "When": 10997,
+              "Sum": 3
+            }
+          ]
+        },
+        {
+          "Comment":"Network firewall rules",
+          "ID": 5147,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10999,
+              "Sum": 10
+            },
+            {
+              "When": 11000,
+              "Sum": 7
+            },
+            {
+              "When": 11001,
+              "Sum": 3
+            }
+          ]
+        },
+        {
+          "Comment":"Does system have access to management network?",
+          "ID": 5138,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10966,
+              "Sum": 5
+            }
+          ]
+        },
+        {
+          "Comment":"Does machine have public IP address?",
+          "ID": 5139,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10968,
+              "Sum": 5
+            }
+          ]
+        },
+        {
+          "Comment":"Up to date OS?",
+          "ID": 5140,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10969,
+              "Sum": 10
+            }
+          ]
+        },
+        {
+          "Comment":"How often are OS patches",
+          "ID": 5141,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10972,
+              "Sum": 10
+            },
+            {
+              "When": 10973,
+              "Sum": 8
+            },
+            {
+              "When": 10974,
+              "Sum": 6
+            },
+            {
+              "When": 10975,
+              "Sum": 3
+            },
+            {
+              "When": 10976,
+              "Sum": -1
+            },
+            {
+              "When": 10977,
+              "Sum": -10
+            }
+          ]
+        },
+        {
+          "Comment":"How often are application patches",
+          "ID": 5142,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10979,
+              "Sum": 10
+            },
+            {
+              "When": 10980,
+              "Sum": 8
+            },
+            {
+              "When": 10981,
+              "Sum": 6
+            },
+            {
+              "When": 10982,
+              "Sum": 3
+            },
+            {
+              "When": 10983,
+              "Sum": -1
+            },
+            {
+              "When": 10984,
+              "Sum": -10
+            }
+          ]
+        },
+        {
+          "Comment":"How many assets or servers depend on this asset?",
+          "ID": 5143,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10985,
+              "Sum": 7
+            },
+            {
+              "When": 10986,
+              "Sum": 4
+            },
+            {
+              "When": 10987,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"How many users are impacted by the services this asset supports?",
+          "ID": 5144,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10988,
+              "Sum": 7
+            },
+            {
+              "When": 10989,
+              "Sum": 4
+            },
+            {
+              "When": 10990,
+              "Sum": 1
+            }
+          ]
+        },
+        {
+          "Comment":"How important is this asset to the University as a whole?",
+          "ID": 5145,
+          "Type": "Lookup",
+          "Lookup": [
+            {
+              "When": 10992,
+              "Sum": 10
+            },
+            {
+              "When": 10993,
+              "Sum": 6
+            },
+            {
+              "When": 10994,
+              "Sum": 1
+            }
+          ]
+        }
+      ]
+    }
