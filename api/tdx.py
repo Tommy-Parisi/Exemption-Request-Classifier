@@ -1,7 +1,7 @@
 import os
-import requests
+import requests 
 import json
-from dotenv import load_dotenv
+from dotenv import load_dotenv 
 import base64
 
 
@@ -47,18 +47,34 @@ if make_request:
             print("Success")
             request_data = request.json()
             ticket_data = request_data["data"]
-            filtered = {
+            ticket_attachments = ticket_data.get("Attachments", [])
+            if ticket_attachments:
+                for attachment in ticket_attachments:
+                    attachment_id = attachment.get("ID")
+                    data = {
+                        "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
+                    }
+                    attachment_request = requests.post(BASE_URL, headers=headers, json=data)
+                    attachment_data = []
+                    attachment_data.append(attachment_request.json()["data"])
+
+            else:
+                attachment_data = "None"
+            
+
+            filtered_data = {
                 "requestor": ticket_data.get("RequestorName"),
                 "department": ticket_data.get("AccountName"),
                 "reason": ticket_data.get("Description"),
+                "attachments": attachment_data
             }
+            
             filtered_attributes = {
                 "Type of Exception" : "exceptionType",
                 "Exception Start Date" : "startDate",
                 "Hostnames" : "hostnames",
                 "Unit Head" : "unitHead",
                 "Risk Assessment Justification" : "riskAssessment",
-                #look into getting attachments
                 "Level of Data": "dataLevelStored",
                 "Level of Data: Specify" : "dataLevelStoredSpecified",
                 "Level of data the device has access to" : "dataAccessLevel",
@@ -78,33 +94,16 @@ if make_request:
                 "Impacted Systems, Services and Data" : "impactedSystems",
                 "Summary of Compensating Information Security Controls" : "mitigation"
             }
+
             attributes = ticket_data.get("Attributes")
-            
             for attr in attributes:
                 name = attr.get("Name")
                 value = attr.get("ValueText")
                 if name in filtered_attributes:
                     mapped_key = filtered_attributes[name]
-                    filtered[mapped_key] = value
+                    filtered_data[mapped_key] = value
+
     with open("api/filtered_form_output.json", "w") as outfile:
-        json.dump(filtered, outfile, indent=4)
+        json.dump(filtered_data, outfile, indent=4)
         print("Output File successfully created")
-    ''' file_name = "TicketID_" + str(ticket_id) + ".json"
-            with open(f"api/individual_exceptions/{file_name}", 'w', encoding='utf-8') as f:
-                json.dump(ticket_data, f, indent=4)
-            print(f"Successfully fetched {n} ticket(s)")
-        else:
-            print(f"Error: {request.status_code}")
-            print(request.text)
-
-    if has_attachment:
-        with open("api/exceptions_attachment_1.json", "r") as f:
-            response = json.load(f)
-
-        base64_data = response["data"]
-        image_bytes = base64.b64decode(base64_data)
         
-        with open("api/attachment.png", "wb") as img:
-            img.write(image_bytes)
-        
-        print("image successfully saved")'''
