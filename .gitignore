@@ -8,3 +8,4 @@ api/individual_exceptions
 api/exceptions_attachment_*.json
 api/exceptions.json
 api/all_tickets.json
+api/ticket_cache.json

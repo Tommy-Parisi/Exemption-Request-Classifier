@@ -2,108 +2,150 @@ import os
 import requests 
 import json
 from dotenv import load_dotenv 
-import base64
+import time
 
 
 load_dotenv()
+#Web request information consisting of the URL, API key and header information to call TDX API
 BASE_URL = "https://us.ipaas.teamdynamix.com/tdapp/app/flow/api/v1/start/20/88398cb6-c77f-4f9d-b175-ba633ae09ab5?WaitForResults=true"
 TDX_API_KEY = os.getenv("TDX_API_KEY")
 headers = {
             "Content-Type":"application/json",
             "apikey": f"{TDX_API_KEY}"
         }
-#Create a json file containing all the submitted security policy exception tickets.
-#Look into fetching all tickets, individual tickets or a certain range of tickets.
 
+#Makes the TDX API call and handles the different methods
+def tdx_call(data):
+     response = requests.post(BASE_URL, headers=headers, json=data)
+     if response.status_code != 200:
+          print("Error calling TDX API: " + response.status_code, response.text)
+          return None
+     return response.json()["data"]
 
-'''data = {"Method": "Get_Tickets"}
-request = requests.post(BASE_URL, headers=headers, json=data)
-if request.status_code == 200:
-    print("Success")
-    request_data = request.json()
-    all_tickets_data = request_data["data"]
-    with open(f"api/all_tickets.json", "w", encoding='utf-8') as f:
-         json.dump(all_tickets_data, f, indent=4)
-    print("Successfully created all_tickets.json")
-else:
-    print("Error: " + request.status_code)
-'''
-with open("api/exceptions.json", "r") as f:
-    all_ticket_data = json.load(f)
-make_request = True
+#Cache file path and name
+cache_file = "api/ticket_cache.json"
 
-if make_request:
-    for n in range(1):
-        ticket_id = all_ticket_data["data"]["ID"]
-        data = {
-            #"Method": "Get_Tickets"
-            "Method": "Get_Ticket", "TicketID": str(ticket_id)
-            #"Method": "Get_Attachment", "TicketID": "151542", "AttachmentID": "cbbfb589-216c-4034-a76a-85bbef78a110"
-        }
+#If the json file doesn't exist, create the file with ticket_ids and ticket_data fields, else return the file data
+def load_cache():
+    if not os.path.exists(cache_file):
+        return {"ticket_ids":[], "ticket_data":{}}
+    
+    with open(cache_file, "r") as f:
+        return json.load(f)
 
-        request = requests.post(BASE_URL, headers=headers, json=data)
+#Writes current cache to the ticket_cache.json file
+def save_cache(cache):
+    with open(cache_file, "w") as f:
+        json.dump(cache, f, indent=4)
 
-        if request.status_code == 200:
-            print("Success")
-            request_data = request.json()
-            ticket_data = request_data["data"]
-            ticket_attachments = ticket_data.get("Attachments", [])
-            if ticket_attachments:
-                for attachment in ticket_attachments:
-                    attachment_id = attachment.get("ID")
-                    data = {
-                        "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
-                    }
-                    attachment_request = requests.post(BASE_URL, headers=headers, json=data)
-                    attachment_data = []
-                    attachment_data.append(attachment_request.json()["data"])
+#Gets all tickets using the TDX API
+def get_all_open_tickets():
+    data = {"Method": "Get_Tickets", "Only_Open":"true"}
+    return tdx_call(data)
 
-            else:
-                attachment_data = "None"
-            
-
-            filtered_data = {
-                "requestor": ticket_data.get("RequestorName"),
-                "department": ticket_data.get("AccountName"),
-                "reason": ticket_data.get("Description"),
-                "attachments": attachment_data
-            }
-            
-            filtered_attributes = {
-                "Type of Exception" : "exceptionType",
-                "Exception Start Date" : "startDate",
-                "Hostnames" : "hostnames",
-                "Unit Head" : "unitHead",
-                "Risk Assessment Justification" : "riskAssessment",
-                "Level of Data": "dataLevelStored",
-                "Level of Data: Specify" : "dataLevelStoredSpecified",
-                "Level of data the device has access to" : "dataAccessLevel",
-                "Level of data the device has access to: Specify": "dataAccessLevelSpecified",
-                "Allow Vulnerability Scanning Agent on Client?" : "vulnScanner",
-                "Allow EDR (Crowdstrike on Client)" : "edrAllowed",
-                "Local Firewall Rules" : "localFirewall",
-                "Network Firewall Rules" : "networkFirewall",
-                "Does system have access to management network?" : "managementAccess",
-                "Does this machine have a public IP address?" : "publicIP",
-                "Is the operating system up to date with the latest patch?" : "osUpToDate",
-                "How often are OS patches installed" : "osPatchFrequency",
-                "How often are application patches installed" : "appPatchFrequency",
-                "How many assets or servers depend on this asset?" : "dependencyLevel",
-                "How many users are impacted by the services this asset supports?" : "userImpact",
-                "How important is this asset to the University as a whole?" : "universityImpact",
-                "Impacted Systems, Services and Data" : "impactedSystems",
-                "Summary of Compensating Information Security Controls" : "mitigation"
-            }
-
-            attributes = ticket_data.get("Attributes")
-            for attr in attributes:
-                name = attr.get("Name")
-                value = attr.get("ValueText")
-                if name in filtered_attributes:
-                    mapped_key = filtered_attributes[name]
-                    filtered_data[mapped_key] = value
-
-    with open("api/filtered_form_output.json", "w") as outfile:
-        json.dump(filtered_data, outfile, indent=4)
-        print("Output File successfully created")
+#Grabs relevant information fields from the requested ticket and returns the filtered data. 
+def process_ticket(ticket_id):
+        tix_data = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
         
+        ticket_data = tdx_call(tix_data)
+        if not ticket_data:
+            print("Cannot find ticket based on ID")
+            return None
+        
+        #Check for attachments, if not present, produce empty array
+        ticket_attachments = ticket_data.get("Attachments", [])
+        if ticket_attachments:
+            attachments_data = []
+            for attachment in ticket_attachments:
+                attachment_id = attachment.get("ID")
+                att_data = {
+                    "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
+                    }
+                attachments_data.append(tdx_call(att_data))
+        else:
+            attachments_data = "None"
+
+        #Grab relevant data from the 'data' field of the ticket data and format it for json output    
+        filtered_data = {
+            "requestor": ticket_data.get("RequestorName"),
+            "department": ticket_data.get("AccountName"),
+            "reason": ticket_data.get("Description"),
+            "attachments": attachments_data
+            }
+        #Grab relevant data from the 'attributes' field of the 'data' field and format the field names to prepare them to be added to filtered_data
+        filtered_attributes = {
+            "Type of Exception" : "exceptionType",
+            "Exception Start Date" : "startDate",
+            "Hostnames" : "hostnames",
+            "Unit Head" : "unitHead",
+            "Risk Assessment Justification" : "riskAssessment",
+            "Level of Data": "dataLevelStored",
+            "Level of Data: Specify" : "dataLevelStoredSpecified",
+            "Level of data the device has access to" : "dataAccessLevel",
+            "Level of data the device has access to: Specify": "dataAccessLevelSpecified",
+            "Allow Vulnerability Scanning Agent on Client?" : "vulnScanner",
+            "Allow EDR (Crowdstrike on Client)" : "edrAllowed",
+            "Local Firewall Rules" : "localFirewall",
+            "Network Firewall Rules" : "networkFirewall",
+            "Does system have access to management network?" : "managementAccess",
+            "Does this machine have a public IP address?" : "publicIP",
+            "Is the operating system up to date with the latest patch?" : "osUpToDate",
+            "How often are OS patches installed" : "osPatchFrequency",
+            "How often are application patches installed" : "appPatchFrequency",
+            "How many assets or servers depend on this asset?" : "dependencyLevel",
+            "How many users are impacted by the services this asset supports?" : "userImpact",
+            "How important is this asset to the University as a whole?" : "universityImpact",
+            "Impacted Systems, Services and Data" : "impactedSystems",
+            "Summary of Compensating Information Security Controls" : "mitigation"
+            }
+
+        attributes = ticket_data.get("Attributes")
+        for attr in attributes:
+            #The 'Name' and 'ValueText' field are the names and data of the relavant input fields from the security policy exception form
+            #See the 'filtered_attributes' keys for example of 'Name' values
+            name = attr.get("Name")
+            value = attr.get("ValueText")
+            if name in filtered_attributes:
+                mapped_key = filtered_attributes[name]
+                filtered_data[mapped_key] = value
+
+        return filtered_data
+
+
+def main_loop():
+    while True:
+        print("Checking for new tickets...")
+        cache = load_cache()
+
+        open_tickets = get_all_open_tickets()
+
+        #Sleep timer to reduce making continuous API calls if something is wrong
+        if not open_tickets:
+            time.sleep(300)
+            continue
+        
+        #Create an array of ticket ids for fetched open tickets
+        current_ids = [ticket["TicketID"] for ticket in open_tickets]
+
+        #Filter for new ids by checking the current cached ids
+        new_ids = [ticket_id for ticket_id in current_ids if ticket_id not in cache["ticket_ids"]]
+
+        if new_ids:
+            print("New ticket ID(s):", new_ids)
+            for ticket_id in new_ids:
+                processed = process_ticket(ticket_id)
+            
+            if processed:
+                cache["ticket_ids"].append(ticket_id)
+                cache["ticket_data"][ticket_id] = processed
+                save_cache(cache)
+                print(f"Processed and cached ticket {ticket_id}")
+        else:
+            print("No new tickets found")
+
+        #Check every hour for new tickets
+        time.sleep(3600)
+        
+
+if __name__ == "__main__":
+    main_loop()
