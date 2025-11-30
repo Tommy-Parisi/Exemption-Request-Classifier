@@ -72,9 +72,10 @@ def process_ticket(ticket_id):
             "reason": ticket_data.get("Description"),
             "attachments": attachments_data
             }
-        #Grab relevant data from the 'attributes' field of the 'data' field and format the field names to prepare them to be added to filtered_data
+        #Format the attribute field names to prepare them to be added to filtered_data
         filtered_attributes = {
             "Type of Exception" : "exceptionType",
+            "If OTHER please specify": "exceptionSpecified",
             "Exception Start Date" : "startDate",
             "Hostnames" : "hostnames",
             "Unit Head" : "unitHead",
@@ -98,14 +99,15 @@ def process_ticket(ticket_id):
             "Impacted Systems, Services and Data" : "impactedSystems",
             "Summary of Compensating Information Security Controls" : "mitigation"
             }
-
+        
+        #Grab relevant data from the 'attributes' field of the 'data' field
         attributes = ticket_data.get("Attributes")
         for attr in attributes:
             #The 'Name' and 'ValueText' field are the names and data of the relavant input fields from the security policy exception form
             #See the 'filtered_attributes' keys for example of 'Name' values
             name = attr.get("Name")
             value = attr.get("ValueText")
-            if name in filtered_attributes:
+            if name in filtered_attributes: #Check if should still write key value pair with value of "N/A" or "None" if key isn't present in ticket data
                 mapped_key = filtered_attributes[name]
                 filtered_data[mapped_key] = value
 
