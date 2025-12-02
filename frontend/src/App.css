@@ -55,6 +55,7 @@ button:hover {
 
 .chat-window{
   position: fixed;
+  font-size: small;
   bottom: 90px;
   right: 20px;
   width: 400px;
@@ -65,9 +66,16 @@ button:hover {
   padding: 1rem;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   z-index: 9999;
-  overflow: auto;
 }
+
 .chat-window-header{
+  font-size: medium;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.chat-window-textbox{
+  width: 360px;
+  height: 520px;
+  overflow: auto;
 }
