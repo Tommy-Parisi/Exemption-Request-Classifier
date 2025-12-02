@@ -28,6 +28,7 @@ type FormData = {
   userImpact: string;
   universityImpact: string;
   mitigation: string;
+  attachment: File | null;
 };
 
 type ChatMessage = {
