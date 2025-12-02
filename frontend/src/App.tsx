@@ -529,8 +529,9 @@ function App() {
     {/* ==== CHAT-WINDOW ====*/}
     {isOpen && (
     <div className="chat-window">
-      <h2>Support Chat</h2>
-      <p>Hello, I am here to assist you through this form. If you have any questions dont hesitate to ask!</p>
+      <h2 className="chat-window-header">Support Chat</h2>
+      <p></p>
+      <p>Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
     </div>
     )}
     </div>
