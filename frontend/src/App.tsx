@@ -1,5 +1,6 @@
 import { useState } from "react";
 import './styles/tailwind.css';
+import './App.css';
 
 function App() {
   const [formData, setFormData] = useState({
@@ -54,7 +55,12 @@ function App() {
     }
   };
 
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleChat = () => {setIsOpen(!isOpen)};
+
+
   return (
+    <div>
     <div className="page">
       {/* ===== HEADER ===== */}
       <header className="header">
@@ -517,6 +523,16 @@ function App() {
           IT Security · Policy Exemption Analyzer
         </p>
       </footer>
+    </div>
+    {/* ===== CHAT-BUBBLE ====*/}
+    <div className="chat-bubble" onClick={toggleChat}>💬</div>
+    {/* ==== CHAT-WINDOW ====*/}
+    {isOpen && (
+    <div className="chat-window">
+      <h2>Support Chat</h2>
+      <p>Hello, I am here to assist you through this form. If you have any questions dont hesitate to ask!</p>
+    </div>
+    )}
     </div>
   );
 }

@@ -49,5 +49,21 @@ button:hover {
   align-items: center;
   font-size: 30px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba (0,0,0,0.2);
+  z-index: 9999;
+  border: 2px solid yellow;
+}
+
+.chat-window{
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 300px;
+  height: 500px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  z-index: 9999;
+  overflow: auto;
 }
