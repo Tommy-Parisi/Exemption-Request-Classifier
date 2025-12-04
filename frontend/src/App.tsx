@@ -562,7 +562,7 @@ function App() {
       <h2 className="chat-window-header">Support Chat</h2>
       {/* ==== MESSAGE-WINDOW ====*/}
         <div className="chat-window-textbox">
-          <p>Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
+          <p className="ai-message">Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
           {messages.map((msg, index) =>
           msg.sender === "user" ? (
             <div key={index} className="user-message">
