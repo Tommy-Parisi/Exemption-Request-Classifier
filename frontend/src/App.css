@@ -116,10 +116,11 @@ button:hover {
   width: fit-content;
   max-width: 80%;
   word-wrap: break-word;
+  font: 11px;
 }
 
 .ai-message{
-  background: white;
+  background: #ffd300;
   color: black;
   align-self: flex-start;
   padding: 6px 10px;
@@ -128,4 +129,5 @@ button:hover {
   width: fit-content;
   max-width: 80%;
   word-wrap: break-word;
+  font: 11px;
 }
