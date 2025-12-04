@@ -60,16 +60,26 @@ function App() {
   const [isOpen, setIsOpen] = useState(true);
   const toggleChat = () => {setIsOpen(!isOpen)};
 
-  {/*User Sent Messages*/}
+  {/*User and AI Sent Messages*/}
   type ChatMessage={text:string; sender: "user"|"AI";};
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (inputValue.trim() === "") return;
     setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message:inputValue})
+  
+    });
+    const aiMessage = await response.json();
+    setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
+
     setInputValue("");
-  }
+  };
 
   {/*Auto Scroll*/}
   const messagesEndRef = useRef<HTMLDivElement>(null);
