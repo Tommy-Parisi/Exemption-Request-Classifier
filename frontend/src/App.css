@@ -106,7 +106,10 @@ button:hover {
   transition: 0.2s ease;
 }
 
-.chat-message{
+.user-message{
+  background-color: #005ea1;
+  color: white;
+  align-self: flex-end;
   padding: 6px 10px;
   margin-bottom: 8px;
   border-radius: 6px;
@@ -115,14 +118,14 @@ button:hover {
   word-wrap: break-word;
 }
 
-.user-message{
-  background-color: #005ea1;
-  color: white;
-  align-self: flex-end;
-}
-
 .ai-message{
   background: white;
   color: black;
   align-self: flex-start;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  width: fit-content;
+  max-width: 80%;
+  word-wrap: break-word;
 }
