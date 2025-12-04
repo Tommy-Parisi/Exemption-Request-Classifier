@@ -55,7 +55,7 @@ button:hover {
 
 .chat-window{
   position: fixed;
-  font-size: small;
+  font-size: 12px;
   bottom: 90px;
   right: 20px;
   width: 400px;
@@ -76,6 +76,53 @@ button:hover {
 
 .chat-window-textbox{
   width: 360px;
-  height: 520px;
+  height: 495px;
   overflow: auto;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  word-wrap: break-word;
+}
+
+.chat-input{
+  display: flex;
+}
+
+.chat-input-box{
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.chat-input-button{
+  padding: 8px 16px;
+  background-color: #005ea1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.chat-message{
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  width: fit-content;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.user-message{
+  background-color: #005ea1;
+  color: white;
+  align-self: flex-end;
+}
+
+.ai-message{
+  background: white;
+  color: black;
+  align-self: flex-start;
 }
