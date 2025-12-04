@@ -54,9 +54,21 @@ function App() {
       setResponse("Error: Could not reach backend");
     }
   };
-
+  
+  {/*Chat Bubble Stuff*/}
   const [isOpen, setIsOpen] = useState(true);
   const toggleChat = () => {setIsOpen(!isOpen)};
+
+  {/*User Sent Messages*/}
+  type ChatMessage={text:string; sender: "user"|"AI"; timestamp: number;};
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+
+  const sendMessage = () => {
+    if (inputValue.trim() === "") return;
+    setMessages( prev => [...prev, {text: inputValue, sender: "user", timestamp: Date.now()}])
+    setInputValue("");
+  }
 
 
   return (
@@ -530,8 +542,24 @@ function App() {
     {isOpen && (
     <div className="chat-window">
       <h2 className="chat-window-header">Support Chat</h2>
+      {/* ==== MESSAGE-WINDOW ====*/}
         <div className="chat-window-textbox">
-        <p>Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
+          <p>Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
+          {messages.map((messages, index) =>(
+            <p key={index} className="chat-message user-message">
+              {messages.text}
+            </p>
+          ))}
+        </div>
+        {/* ==== IPUT-WINDOW ====*/}
+        <div className="chat-input">
+          <input type="text" className="chat-input-box" 
+          placeholder="Type here..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          />
+          <button className="chat-input-button">Send</button>"
         </div>
     </div>
     )}
