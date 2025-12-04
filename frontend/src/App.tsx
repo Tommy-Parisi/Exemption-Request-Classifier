@@ -69,16 +69,16 @@ function App() {
     if (inputValue.trim() === "") return;
     setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
 
-    const response = await fetch("/api/chat", {
+    setInputValue("");
+
+    const aiResponse = await fetch("http://localhost:8000/chat", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({message:inputValue})
   
     });
-    const aiMessage = await response.json();
+    const aiMessage = await aiResponse.json();
     setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
-
-    setInputValue("");
   };
 
   {/*Auto Scroll*/}
@@ -573,7 +573,7 @@ function App() {
               {msg.text}
             </div>
           )
-          )};
+          )}
             {/* ==== AUTO-SCROLL ====*/}
             <div ref={messagesEndRef}/>
         </div>
@@ -585,7 +585,7 @@ function App() {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <button className="chat-input-button">Send</button>"
+          <button className="chat-input-button">Send</button>
         </div>
     </div>
     )}
