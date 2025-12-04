@@ -67,7 +67,7 @@ gemini = OpenAI(
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.0-pro-exp")
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
 GEMINI_EVAL_MODEL = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 def evaluate(reply, message, history) -> Evaluation:
@@ -95,7 +95,42 @@ def rerun(reply, message, history, feedback):
     return response.choices[0].message.content
 
 
-    
+def _normalize_history(history):
+    """Ensure history is formatted as OpenAI/Gemini style messages with string content."""
+    normalized = []
+    if not history:
+        return normalized
+
+    for entry in history:
+        if isinstance(entry, dict) and "role" in entry:
+            role = entry["role"]
+            content = entry.get("content", "")
+        elif isinstance(entry, (list, tuple)) and len(entry) == 2:
+            user_msg, assistant_msg = entry
+            normalized.append({"role": "user", "content": str(user_msg)})
+            normalized.append({"role": "assistant", "content": str(assistant_msg)})
+            continue
+        else:
+            # Fallback to treating entry as assistant text
+            role = "assistant"
+            content = str(entry)
+
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict):
+                    text_parts.append(part.get("text") or part.get("content") or "")
+                else:
+                    text_parts.append(str(part))
+            content = "".join(text_parts)
+        elif not isinstance(content, str):
+            content = str(content)
+
+        normalized.append({"role": role, "content": content})
+
+    return normalized
+
+
 def format_form_data(form_data: dict) -> str:
     """Format form data into a readable string for the LLM context."""
     if not form_data:
@@ -154,19 +189,20 @@ def get_system_prompt_with_form_data(form_data: dict = None) -> str:
     return prompt
 
 def chat(message, history):
+    normalized_history = _normalize_history(history)
     system = system_prompt
-    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
+    messages = [{"role": "system", "content": system}] + normalized_history + [{"role": "user", "content": message}]
     response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
     reply = response.choices[0].message.content
 
-    evaluation = evaluate(reply, message, history)
+    evaluation = evaluate(reply, message, normalized_history)
     
     if evaluation.is_acceptable:
         print("Passed evaluation - returning reply")
     else:
         print("Failed evaluation - retrying")
         print(evaluation.feedback)
-        reply = rerun(reply, message, history, evaluation.feedback)       
+        reply = rerun(reply, message, normalized_history, evaluation.feedback)       
     return reply
 
 def chat_with_form_data(message: str, form_data: dict = None, history: list = None):
@@ -177,18 +213,19 @@ def chat_with_form_data(message: str, form_data: dict = None, history: list = No
     # Get system prompt with form data context
     system = get_system_prompt_with_form_data(form_data)
     
-    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
+    normalized_history = _normalize_history(history)
+    messages = [{"role": "system", "content": system}] + normalized_history + [{"role": "user", "content": message}]
     response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
     reply = response.choices[0].message.content
 
-    evaluation = evaluate(reply, message, history)
+    evaluation = evaluate(reply, message, normalized_history)
     
     if evaluation.is_acceptable:
         print("Passed evaluation - returning reply")
     else:
         print("Failed evaluation - retrying")
         print(evaluation.feedback)
-        reply = rerun(reply, message, history, evaluation.feedback)       
+        reply = rerun(reply, message, normalized_history, evaluation.feedback)       
     return reply
 
 # Only launch Gradio interface if this file is run directly
