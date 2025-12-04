@@ -61,13 +61,13 @@ function App() {
   const toggleChat = () => {setIsOpen(!isOpen)};
 
   {/*User Sent Messages*/}
-  type ChatMessage={text:string; sender: "user"|"AI"; timestamp: number;};
+  type ChatMessage={text:string; sender: "user"|"AI";};
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
 
   const sendMessage = () => {
     if (inputValue.trim() === "") return;
-    setMessages( prev => [...prev, {text: inputValue, sender: "user", timestamp: Date.now()}])
+    setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
     setInputValue("");
   }
 
@@ -553,11 +553,17 @@ function App() {
       {/* ==== MESSAGE-WINDOW ====*/}
         <div className="chat-window-textbox">
           <p>Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
-          {messages.map((messages, index) =>(
-            <p key={index} className="chat-message user-message">
-              {messages.text}
-            </p>
-            ))}
+          {messages.map((msg, index) =>
+          msg.sender === "user" ? (
+            <div key={index} className="user-message">
+              {msg.text}
+            </div>
+          ) : (
+            <div key={index} className="ai-message">
+              {msg.text}
+            </div>
+          )
+          )};
             {/* ==== AUTO-SCROLL ====*/}
             <div ref={messagesEndRef}/>
         </div>
