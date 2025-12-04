@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRef, useEffect } from "react";
 import './styles/tailwind.css';
 import './App.css';
 
@@ -69,6 +70,13 @@ function App() {
     setMessages( prev => [...prev, {text: inputValue, sender: "user", timestamp: Date.now()}])
     setInputValue("");
   }
+
+  {/*Auto Scroll*/}
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
+  }, [messages]);
 
 
   return (
@@ -549,7 +557,9 @@ function App() {
             <p key={index} className="chat-message user-message">
               {messages.text}
             </p>
-          ))}
+            ))}
+            {/* ==== AUTO-SCROLL ====*/}
+            <div ref={messagesEndRef}/>
         </div>
         {/* ==== IPUT-WINDOW ====*/}
         <div className="chat-input">
