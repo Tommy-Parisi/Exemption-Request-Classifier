@@ -66,9 +66,6 @@ function App() {
   });
 
   const [response, setResponse] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [isChatting, setIsChatting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -80,7 +77,7 @@ function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5173/chat", {
+      const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -107,10 +104,13 @@ function App() {
 
     setInputValue("");
 
-    const aiResponse = await fetch("http://localhost:5173/chat", {
+    const aiResponse = await fetch("http://localhost:8000/chat", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message:inputValue})
+      body: JSON.stringify({
+        message:inputValue,
+        history:[]
+      })
   
     });
     const aiMessage = await aiResponse.json();
