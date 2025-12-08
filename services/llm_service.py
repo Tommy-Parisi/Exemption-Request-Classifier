@@ -2,18 +2,26 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pypdf import PdfReader
 import gradio as gr
+import os
 
 load_dotenv(override=True)
 openai = OpenAI()
 
-reader = PdfReader("security_data/UD.pdf")
+# Get the directory where this file is located
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+_security_data_dir = os.path.join(_current_dir, "security_data")
+
+pdf_path = os.path.join(_security_data_dir, "UD.pdf")
+summary_path = os.path.join(_security_data_dir, "summary.txt")
+
+reader = PdfReader(pdf_path)
 security_form = ""
 for page in reader.pages:
     text = page.extract_text()
     if text:
         security_form += text
 
-with open("security_data/summary.txt", "r", encoding="utf-8") as f:
+with open(summary_path, "r", encoding="utf-8") as f:
     summary = f.read()
 
 name = "Security Analyst Assistant"
@@ -50,16 +58,26 @@ def evaluator_user_prompt(reply, message, history):
     user_prompt += "Please evaluate the response, replying with whether it is acceptable and your feedback."
     return user_prompt
 
-import os
+gemini_api_key = os.getenv("GOOGLE_API_KEY_2")
+if not gemini_api_key:
+    raise ValueError("GOOGLE_API_KEY_2 environment variable is required for Gemini access.")
+
 gemini = OpenAI(
-    api_key=os.getenv("GOOGLE_API_KEY"), 
+    api_key=gemini_api_key,
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
+
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+GEMINI_EVAL_MODEL = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 def evaluate(reply, message, history) -> Evaluation:
 
     messages = [{"role": "system", "content": evaluator_system_prompt}] + [{"role": "user", "content": evaluator_user_prompt(reply, message, history)}]
-    response = gemini.beta.chat.completions.parse(model="gemini-2.0-flash", messages=messages, response_format=Evaluation)
+    response = gemini.beta.chat.completions.parse(
+        model=GEMINI_EVAL_MODEL,
+        messages=messages,
+        response_format=Evaluation,
+    )
     return response.choices[0].message.parsed
 
 # Test code (commented out - uncomment to test evaluation)
@@ -73,27 +91,143 @@ def rerun(reply, message, history, feedback):
     updated_system_prompt += f"## Your attempted answer:\n{reply}\n\n"
     updated_system_prompt += f"## Reason for rejection:\n{feedback}\n\n"
     messages = [{"role": "system", "content": updated_system_prompt}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
     return response.choices[0].message.content
 
-def chat(message, history):
-    if "patent" in message:
-        system = system_prompt + "\n\nEverything in your reply needs to be in pig latin - \
-              it is mandatory that you respond only and entirely in pig latin"
-    else:
-        system = system_prompt
-    messages = [{"role": "system", "content": system}] + history + [{"role": "user", "content": message}]
-    response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
-    reply =response.choices[0].message.content
 
-    evaluation = evaluate(reply, message, history)
+def _normalize_history(history):
+    """Ensure history is formatted as OpenAI/Gemini style messages with string content."""
+    normalized = []
+    if not history:
+        return normalized
+
+    for entry in history:
+        if isinstance(entry, dict) and "role" in entry:
+            role = entry["role"]
+            content = entry.get("content", "")
+        elif isinstance(entry, (list, tuple)) and len(entry) == 2:
+            user_msg, assistant_msg = entry
+            normalized.append({"role": "user", "content": str(user_msg)})
+            normalized.append({"role": "assistant", "content": str(assistant_msg)})
+            continue
+        else:
+            # Fallback to treating entry as assistant text
+            role = "assistant"
+            content = str(entry)
+
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict):
+                    text_parts.append(part.get("text") or part.get("content") or "")
+                else:
+                    text_parts.append(str(part))
+            content = "".join(text_parts)
+        elif not isinstance(content, str):
+            content = str(content)
+
+        normalized.append({"role": role, "content": content})
+
+    return normalized
+
+
+def format_form_data(form_data: dict) -> str:
+    """Format form data into a readable string for the LLM context."""
+    if not form_data:
+        return ""
+    
+    formatted = "\n## Current Form Data:\n"
+    formatted += "The user has provided the following information in their exemption request form:\n\n"
+    
+    # Field labels mapping for better readability
+    field_labels = {
+        "requestor": "Requestor",
+        "department": "Department",
+        "exceptionType": "Type of Exception",
+        "reason": "Reason for Request",
+        "startDate": "Exception Start Date",
+        "hostnames": "Hostnames",
+        "unitHead": "Unit Head",
+        "riskAssessment": "Risk Assessment Justification",
+        "impactedSystems": "Impacted Systems, Services and Data",
+        "dataLevelStored": "Level of Data Stored on System",
+        "dataAccessLevel": "Level of Data the Device has Access to",
+        "vulnScanner": "Allow Vulnerability Scanning Agent on Client",
+        "edrAllowed": "Allow EDR (Crowdstrike on Client)",
+        "managementAccess": "Does system have access to management network",
+        "publicIP": "Does this machine have a public IP address",
+        "osUpToDate": "Is the OS up to date with the latest patch",
+        "osPatchFrequency": "How often are OS patches installed",
+        "appPatchFrequency": "How often are application patches installed",
+        "localFirewall": "Local Firewall Rules",
+        "networkFirewall": "Network Firewall Rules",
+        "dependencyLevel": "How many assets or servers depend on this asset",
+        "userImpact": "How many users are impacted by this asset",
+        "universityImpact": "How important is this asset to the University as a whole",
+        "mitigation": "Additional mitigation tools or techniques"
+    }
+    
+    for key, value in form_data.items():
+        if value and str(value).strip():  # Only include non-empty fields
+            label = field_labels.get(key, key)
+            formatted += f"- **{label}**: {value}\n"
+    
+    formatted += "\nUse this information to:\n"
+    formatted += "1. Help the user complete any missing or unclear fields\n"
+    formatted += "2. Provide guidance on how to properly fill out the form based on their specific situation\n"
+    formatted += "3. Suggest improvements or clarifications to their responses\n"
+    formatted += "4. Generate a comprehensive and properly formatted exception request based on their inputs\n"
+    formatted += "5. Answer questions about their specific exemption request\n\n"
+    
+    return formatted
+
+def get_system_prompt_with_form_data(form_data: dict = None) -> str:
+    """Get the system prompt with optional form data context."""
+    prompt = system_prompt
+    if form_data:
+        prompt += format_form_data(form_data)
+    return prompt
+
+def chat(message, history):
+    normalized_history = _normalize_history(history)
+    system = system_prompt
+    messages = [{"role": "system", "content": system}] + normalized_history + [{"role": "user", "content": message}]
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
+    reply = response.choices[0].message.content
+
+    evaluation = evaluate(reply, message, normalized_history)
     
     if evaluation.is_acceptable:
         print("Passed evaluation - returning reply")
     else:
         print("Failed evaluation - retrying")
         print(evaluation.feedback)
-        reply = rerun(reply, message, history, evaluation.feedback)       
+        reply = rerun(reply, message, normalized_history, evaluation.feedback)       
     return reply
 
-gr.ChatInterface(chat, type="messages").launch()
+def chat_with_form_data(message: str, form_data: dict = None, history: list = None):
+    """Chat function that incorporates form data into the context."""
+    if history is None:
+        history = []
+    
+    # Get system prompt with form data context
+    system = get_system_prompt_with_form_data(form_data)
+    
+    normalized_history = _normalize_history(history)
+    messages = [{"role": "system", "content": system}] + normalized_history + [{"role": "user", "content": message}]
+    response = gemini.chat.completions.create(model=GEMINI_CHAT_MODEL, messages=messages)
+    reply = response.choices[0].message.content
+
+    evaluation = evaluate(reply, message, normalized_history)
+    
+    if evaluation.is_acceptable:
+        print("Passed evaluation - returning reply")
+    else:
+        print("Failed evaluation - retrying")
+        print(evaluation.feedback)
+        reply = rerun(reply, message, normalized_history, evaluation.feedback)       
+    return reply
+
+# Only launch Gradio interface if this file is run directly
+if __name__ == "__main__":
+    gr.ChatInterface(chat, type="messages").launch()
