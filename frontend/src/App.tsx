@@ -152,7 +152,7 @@ function App() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Request Security Exception</h2>
           <p className="text-gray-600 mb-6">All fields marked with an asterisk (*) are required.</p>
 
-          <div className="grid gap-10 lg:grid-cols-[3fr_2fr]">
+          <div className="grid gap-10">
             <form onSubmit={handleSubmit} className="space-y-6">
             {/* ===== BASIC INFO ===== */}
             <div>
