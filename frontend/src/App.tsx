@@ -102,16 +102,19 @@ function App() {
     if (inputValue.trim() === "") return;
     setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
 
+    const history = messages.map(msg => ({
+    role: msg.sender === "user" ? "user" : "assistant",
+    content: msg.text
+    }));
+
+    history.push({ role: "user", content: inputValue });
+
     setInputValue("");
 
     const aiResponse = await fetch("http://localhost:8000/chat", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        message:inputValue,
-        history:[]
-      })
-  
+      body: JSON.stringify({message:inputValue, bhistory:[]})
     });
     const aiMessage = await aiResponse.json();
     setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);

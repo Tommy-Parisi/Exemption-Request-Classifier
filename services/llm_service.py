@@ -5,7 +5,7 @@ import gradio as gr
 import os
 
 load_dotenv(override=True)
-openai = OpenAI()
+# openai = OpenAI()
 
 # Get the directory where this file is located
 _current_dir = os.path.dirname(os.path.abspath(__file__))
