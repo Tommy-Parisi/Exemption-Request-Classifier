@@ -1,5 +1,6 @@
 __pycache__
 .env
+.rag_cache
 myenv/
 .DS_Store
 
