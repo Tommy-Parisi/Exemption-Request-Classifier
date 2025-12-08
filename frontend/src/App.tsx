@@ -66,9 +66,6 @@ function App() {
   });
 
   const [response, setResponse] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [isChatting, setIsChatting] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -105,13 +102,19 @@ function App() {
     if (inputValue.trim() === "") return;
     setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
 
+    const history = messages.map(msg => ({
+    role: msg.sender === "user" ? "user" : "assistant",
+    content: msg.text
+    }));
+
+    history.push({ role: "user", content: inputValue });
+
     setInputValue("");
 
     const aiResponse = await fetch("http://localhost:8000/chat", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message:inputValue})
-  
+      body: JSON.stringify({message:inputValue, bhistory:[]})
     });
     const aiMessage = await aiResponse.json();
     setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
@@ -123,45 +126,6 @@ function App() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
   }, [messages]);
-
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
-
-    const newUserMessage: ChatMessage = { role: "user", content: chatInput.trim() };
-    const updatedHistory = [...chatMessages, newUserMessage];
-
-    setChatMessages(updatedHistory);
-    setChatInput("");
-    setIsChatting(true);
-
-    try {
-      const res = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          message: newUserMessage.content,
-          history: updatedHistory,
-        }),
-      });
-      const data = await res.json();
-      const assistantReply: ChatMessage = {
-        role: "assistant",
-        content: data.reply || "No response from backend",
-      };
-      setChatMessages((prev) => [...prev, assistantReply]);
-    } catch {
-      const errorReply: ChatMessage = {
-        role: "assistant",
-        content: "Error: Could not reach backend",
-      };
-      setChatMessages((prev) => [...prev, errorReply]);
-    } finally {
-      setIsChatting(false);
-    }
-  };
 
   return (
     <div>
@@ -191,7 +155,7 @@ function App() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Request Security Exception</h2>
           <p className="text-gray-600 mb-6">All fields marked with an asterisk (*) are required.</p>
 
-          <div className="grid gap-10 lg:grid-cols-[3fr_2fr]">
+          <div className="grid gap-10">
             <form onSubmit={handleSubmit} className="space-y-6">
             {/* ===== BASIC INFO ===== */}
             <div>
@@ -606,73 +570,7 @@ function App() {
                 Submit
               </button>
             </form>
-
-            <section className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 flex flex-col">
-              <div>
-                <h3 className="text-xl font-semibold text-[var(--ud-blue)]">Security Analyst Assistant</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Chat with the LLM-powered analyst. Each reply automatically includes the full conversation history and
-                  your current form inputs for context.
-                </p>
-              </div>
-
-              <div className="mt-4 flex-1 overflow-hidden rounded-md border border-gray-100 bg-gray-50">
-                <div className="h-full overflow-y-auto p-4 space-y-4">
-                  {chatMessages.length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      Ask a question to get started. For example, “Can you help me explain my mitigation strategy?”
-                    </p>
-                  ) : (
-                    chatMessages.map((msg, idx) => (
-                      <div key={`${msg.role}-${idx}`} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        <div
-                          className={`max-w-[90%] rounded-lg px-4 py-3 text-sm whitespace-pre-wrap ${
-                            msg.role === "user"
-                              ? "bg-[var(--ud-blue)] text-white"
-                              : "bg-white border border-gray-200 text-gray-800"
-                          }`}
-                        >
-                          <p className="text-xs font-semibold uppercase tracking-wide mb-1">
-                            {msg.role === "user" ? "You" : "Analyst"}
-                          </p>
-                          <p>{msg.content}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <form onSubmit={handleSendMessage} className="mt-4 space-y-3">
-                <label className="label font-semibold">Message the assistant</label>
-                <textarea
-                  className="textarea h-28"
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Describe what you need help with..."
-                  disabled={isChatting}
-                />
-                <button
-                  type="submit"
-                  disabled={isChatting}
-                  className="bg-[var(--ud-blue)] text-white px-4 py-2 rounded-md hover:bg-blue-800 transition font-medium disabled:opacity-60"
-                >
-                  {isChatting ? "Thinking..." : "Send"}
-                </button>
-              </form>
-            </section>
           </div>
-
-          {response && (
-            <div className="mt-10 border-t pt-6">
-              <h3 className="text-xl font-semibold text-[var(--ud-blue)] mb-2">
-                AI Evaluation
-              </h3>
-              <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                <p className="text-gray-800 whitespace-pre-wrap">{response}</p>
-              </div>
-            </div>
-          )}
         </div>
       </main>
 
