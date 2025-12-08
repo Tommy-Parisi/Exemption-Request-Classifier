@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useRef, useEffect } from "react";
+import './styles/tailwind.css';
+import './App.css';
 import "./styles/tailwind.css";
 
 type FormData = {
@@ -88,6 +91,39 @@ function App() {
       setResponse("Error: Could not reach backend");
     }
   };
+  
+  {/*Chat Bubble Stuff*/}
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleChat = () => {setIsOpen(!isOpen)};
+
+  {/*User and AI Sent Messages*/}
+  type ChatMessage={text:string; sender: "user"|"AI";};
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+
+  const sendMessage = async () => {
+    if (inputValue.trim() === "") return;
+    setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
+
+    setInputValue("");
+
+    const aiResponse = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message:inputValue})
+  
+    });
+    const aiMessage = await aiResponse.json();
+    setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
+  };
+
+  {/*Auto Scroll*/}
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
+  }, [messages]);
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,6 +164,7 @@ function App() {
   };
 
   return (
+    <div>
     <div className="page">
       {/* ===== HEADER ===== */}
       <header className="header">
@@ -647,6 +684,42 @@ function App() {
           IT Security · Policy Exemption Analyzer
         </p>
       </footer>
+    </div>
+    {/* ===== CHAT-BUBBLE ====*/}
+    <div className="chat-bubble" onClick={toggleChat}>💬</div>
+    {/* ==== CHAT-WINDOW ====*/}
+    {isOpen && (
+    <div className="chat-window">
+      <h2 className="chat-window-header">Support Chat</h2>
+      {/* ==== MESSAGE-WINDOW ====*/}
+        <div className="chat-window-textbox">
+          <p className="ai-message">Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
+          {messages.map((msg, index) =>
+          msg.sender === "user" ? (
+            <div key={index} className="user-message">
+              {msg.text}
+            </div>
+          ) : (
+            <div key={index} className="ai-message">
+              {msg.text}
+            </div>
+          )
+          )}
+            {/* ==== AUTO-SCROLL ====*/}
+            <div ref={messagesEndRef}/>
+        </div>
+        {/* ==== IPUT-WINDOW ====*/}
+        <div className="chat-input">
+          <input type="text" className="chat-input-box" 
+          placeholder="Type here..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          />
+          <button className="chat-input-button">Send</button>
+        </div>
+    </div>
+    )}
     </div>
   );
 }
