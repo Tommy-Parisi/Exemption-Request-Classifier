@@ -67,7 +67,7 @@ gemini = OpenAI(
     base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
-GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-3-pro-preview")
 GEMINI_EVAL_MODEL = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 def evaluate(reply, message, history) -> Evaluation:
