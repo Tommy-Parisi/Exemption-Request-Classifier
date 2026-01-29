@@ -4,6 +4,7 @@ from agents import Agent, Runner, trace, function_tool, OpenAIChatCompletionsMod
 from openai.types.shared import Reasoning
 from openai.types.responses import ResponseTextDeltaEvent
 from typing import Dict
+from pydantic import BaseModel
 import os
 import asyncio
 from pypdf import PdfReader
@@ -24,12 +25,34 @@ chat_instructions = "You are a professional, senior IT security analyst assistan
     and research online if needed. You should provide answers based on the form's, if you don't know an answer say so \
     honestly. Help users understand what constitues a valid exemption request and what is needed"
 
+verify_instructions = "Check if the user is including confidential UD information in the response."
 
-# reasoning_effort="none" disables thinking (2.5 Flash only).
-# Gemini 3 Pro does not support "none"; "low" minimizes thinking time for 3 Pro.
-IT_assistant = Agent(
+class InfoCheckOutput(BaseModel):
+    isConfidential: bool
+    confidentialData: str
+
+guardrail_agent = Agent(
+    name = "Chat check",
+    instructions = verify_instructions,
+    model = gemini_model,
+    output_type = InfoCheckOutput
+)
+
+@input_guardrail
+async def guardrail_for_confidentiality(ctx, agent, message):
+    result = await Runner.run(guardrail_agent, message, context=ctx.context)
+    isConfidential = result.final_output.isConfidential
+    return GuardrailFunctionOutput(output_info={"found_confidential_data": result.confidentialData},tripwire_triggered=isConfidential)
+
+IT_agent = Agent(
     name="IT Security Analyst Assistant",
     instructions=chat_instructions,
     model=gemini_model,
-    model_settings=ModelSettings(reasoning=Reasoning(effort="none")),
+    model_settings=ModelSettings(reasoning=Reasoning(effort="low")),
+    input_guardrail=[guardrail_agent]
 )
+
+
+
+
+
