@@ -22,7 +22,7 @@ from typing import Dict, Any
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 from engine.rag_integration import RAGIntegrator
-from engine.risk_scorrer import calculate_risk_score
+from engine.risk_scorer import calculate_risk_score
 from engine.decision_engine import make_exception_decision
 
 
@@ -316,9 +316,17 @@ def run_end_to_end_pipeline():
 
     print("\nCalculating risk score...")
 
-    risk_score = calculate_risk_score(form_data)
+    score_result = calculate_risk_score(form_data)
+    risk_score = score_result['total']
+    breakdown = score_result['breakdown']
 
     print(f"\n[RESULT] Risk Score: {risk_score}/100")
+    print(f"         Score Breakdown:")
+    print(f"           Data Classification:   {breakdown['data_classification']:>3}/30")
+    print(f"           Security Controls Gap: {breakdown['security_controls_gap']:>3}/35")
+    print(f"           Network Exposure:      {breakdown['network_exposure']:>3}/15")
+    print(f"           Patch Management:      {breakdown['patch_management']:>3}/10")
+    print(f"           Impact Assessment:     {breakdown['impact_assessment']:>3}/10")
 
     # Determine risk level
     if risk_score > 90:

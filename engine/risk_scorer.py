@@ -6,6 +6,11 @@ def calculate_risk_score(form_data):
       - 'total': int 0-100 composite risk score
       - 'breakdown': per-category point contributions
       - 'decision': 'Approve' | 'Requires Review' | 'Denied'
+
+    Thresholds:
+      - total < 16: Auto-Approve
+      - total 16-90: Requires Review
+      - total > 90: Auto-Deny
     """
 
     data_stored = {1: 0, 2: 10, 3: 20}
@@ -70,6 +75,9 @@ def calculate_risk_score(form_data):
 
 
 def get_approval_decision(risk_score):
+    """
+    Map risk score to workflow decision per the TDX workflow diagram.
+    """
     if risk_score > 90:
         return "Denied"
     elif risk_score >= 16:
