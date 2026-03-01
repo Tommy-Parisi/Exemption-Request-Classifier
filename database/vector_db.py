@@ -103,8 +103,11 @@ def upsert_data():
                 continue
 
             # Prepare metadata (no None/null values allowed in Pinecone)
-            classification_levels = policy.get("classification_levels", [])
-            classification_str = ", ".join(classification_levels) if classification_levels else ""
+            # Bug 12 fix: store classification_levels as a list so that Pinecone
+            # $in filters work correctly (e.g. {"classification_levels": {"$in": ["III"]}}).
+            # Previously this was collapsed to a single comma-joined string which
+            # made metadata filtering impossible.
+            classification_levels = policy.get("classification_levels", []) or []
 
             vectors_to_upsert.append({
                 "id": policy.get("_id", f"policy-{idx}"),
@@ -113,7 +116,7 @@ def upsert_data():
                     "chunk_text": text,
                     "control_id": policy.get("control_id") or "",
                     "risk_area": policy.get("risk_area") or "",
-                    "classification_levels": classification_str,
+                    "classification_levels": classification_levels,  # list, not string
                     "is_exception_related": bool(policy.get("is_exception_related")),
                     "requires_approval": bool(policy.get("requires_approval")),
                     "approver_role": policy.get("approver_role") or ""

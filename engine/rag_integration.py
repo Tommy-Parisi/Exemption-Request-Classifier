@@ -127,6 +127,16 @@ class RAGIntegrator:
         entry = cache.get(text)
         if not entry:
             return None
+        # Bug 10 fix: honour the same 6-hour TTL for persisted (shelf) embeddings.
+        # Previously the timestamp was stored but never checked, so stale vectors
+        # lingered forever even after the backing index was rebuilt.
+        ts = entry.get("ts", 0.0)
+        if time.time() - ts > self._policy_cache_ttl:
+            del cache[text]
+            self._shelf["embeddings"] = cache
+            self._shelf.sync()
+            logger.debug("Evicted expired embedding from shelf cache (key len=%d)", len(text))
+            return None
         return entry.get("vector")
 
     def _cache_policy_match(self, match: PolicyMatch) -> None:
@@ -180,35 +190,29 @@ class RAGIntegrator:
             except Exception as e:
                 logger.warning(f"Failed to generate embedding via Google API: {e}")
 
-        # Fallback: create a deterministic pseudo-embedding matching index dimensions
-        logger.warning(f"Using fallback embedding generation for dimension {self._index_dimension}")
-        return self._generate_fallback_embedding(text)
+        # Bug 11 fix: do NOT silently fall back to a pseudo-random vector.
+        # Such a vector is semantically meaningless and would return irrelevant
+        # policy matches without any visible signal to the caller.
+        logger.error(
+            "Embedding generation failed (API unavailable or key missing). "
+            "Refusing to use a pseudo-random fallback vector that would produce "
+            "semantically garbage results. Raising so callers can degrade explicitly."
+        )
+        return self._generate_fallback_embedding(text)  # always raises
 
-    def _generate_fallback_embedding(self, text: str) -> List[float]:
-        """Generate a fallback embedding of the correct dimension."""
-        # Create a deterministic pseudo-embedding based on text content
-        vec = []
-        text_bytes = text.encode('utf-8')
-        
-        # Use text hash and content to create vector
-        for i in range(self._index_dimension):
-            # Combine position, hash, and character data
-            if i < len(text_bytes):
-                val = float(text_bytes[i]) / 255.0
-            else:
-                val = float(hash(text + str(i)) % 1000) / 1000.0
-            
-            # Center around 0 and add some variation
-            val = (val - 0.5) * 2.0 * (1.0 + (i % 7) / 10.0)
-            vec.append(val)
-        
-        # Normalize to unit vector
-        magnitude = sum(x * x for x in vec) ** 0.5
-        if magnitude > 0:
-            vec = [x / magnitude for x in vec]
-        
-        self._save_embedding(text, vec)
-        return vec
+    def _generate_fallback_embedding(self, text: str) -> List[float]:  # noqa: ARG002
+        """Bug 11 fix: always raises instead of returning a meaningless pseudo-random vector.
+
+        The previous implementation built a byte-value-derived vector that was
+        semantically meaningless and would silently return irrelevant policy
+        matches.  Raising here forces every call-site to handle embedding
+        failures explicitly rather than propagating garbage into search results.
+        """
+        raise RuntimeError(
+            "Embedding generation failed and no safe fallback is available. "
+            "Verify that LLM_API_KEY is set and that the Google embedding "
+            "endpoint is reachable before retrying."
+        )
 
     def hybrid_search(self,
                       query: str,
@@ -395,7 +399,11 @@ class RAGIntegrator:
 
         metadata_filter = {}
         if data_level is not None:
-            metadata_filter["classification_level"] = {"$in": [data_level]}
+            # Bug 12 fix: the Pinecone metadata field is "classification_levels"
+            # (plural, stored as a list of strings such as ["I", "II", "III"]).
+            # The previous key "classification_level" (singular) never matched
+            # anything because no such field exists in the index metadata.
+            metadata_filter["classification_levels"] = {"$in": [data_level]}
 
         keywords = [exception_type] + (controls or [])
         hits = self.hybrid_search(query=exception_type or json.dumps(exception_request), top_k=top_k, metadata_filter=metadata_filter, keywords=keywords)

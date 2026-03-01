@@ -8,7 +8,7 @@ The Retrieval-Augmented Generation (RAG) system enhances the Security Exception 
 
 ### 1. Core Infrastructure
 - **Vector Database**: Pinecone cloud-hosted vector database
-- **Embedding Model**: Google Gemini embedding API (1024-dimensional vectors)
+- **Embedding Model**: Google Gemini embedding API (768-dimensional vectors)
 - **Language Model**: Google Gemini 2.0-flash (non-reasoning model)
 - **Policy Corpus**: 79 university security policies with NIST SP 800-53 references
 
@@ -33,7 +33,7 @@ University Policy Documents → Text Extraction → Chunking → Embedding Gener
 1. **Document Parsing**: Extract text content from policy documents
 2. **Text Chunking**: Break documents into semantic chunks (typically 512-1024 tokens)
 3. **Metadata Enrichment**: Add policy categories, NIST mappings, and identifiers
-4. **Embedding Generation**: Create 1024-dimensional vectors using Google Gemini embedding API
+4. **Embedding Generation**: Create 768-dimensional vectors using Google Gemini text-embedding-004 API
 5. **Vector Storage**: Store embeddings in Pinecone with metadata in 'policy-and-exemption-criterion' namespace
 
 **Outputs:**
@@ -55,7 +55,7 @@ Exception Request → Query Formation → Hybrid Search → Relevant Policies
 
 **Processing Steps:**
 1. **Query Processing**: Clean and normalize input text
-2. **Embedding Generation**: Convert query to 1024-dimensional vector
+2. **Embedding Generation**: Convert query to 768-dimensional vector
 3. **Hybrid Search Execution**:
    - Vector similarity search in Pinecone
    - Keyword matching for specific policy references
