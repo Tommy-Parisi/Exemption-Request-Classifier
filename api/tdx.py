@@ -3,6 +3,11 @@ import requests
 import json
 from dotenv import load_dotenv 
 import time
+import base64
+import mimetypes
+from pathlib import Path
+import pandas as pd
+import io
 
 
 load_dotenv()
@@ -43,6 +48,81 @@ def get_all_open_tickets():
     data = {"Method": "Get_Tickets", "Only_Open":"true"}
     return tdx_call(data)
 
+
+
+def interpret_attachment(ticket_id, attachment_name, base64_data):
+    decoded_bytes = base64.b64decode(base64_data)
+
+    save_dir = Path("attachments") / str(ticket_id)
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = save_dir / attachment_name
+    file_path.write_bytes(decoded_bytes)
+
+    mime_type = mimetypes.guess_type(attachment_name)[0]
+
+    summary = {
+        "filename": attachment_name,
+        "filetype": mime_type or "unknown",
+        "saved_path": str(file_path)
+    }
+
+    try:
+        #CSV
+        if mime_type == "text/csv":
+            df = pd.read_csv(io.BytesIO(decoded_bytes), nrows = 1000)
+            summary.update({
+                "rows_sampled": len(df),
+                "columns": list(df.columns),
+                "sample_rows": df.head(3).to_dict(orient="records")
+            })
+
+
+        #Text
+        elif mime_type == "text/plain":
+            text = decoded_bytes.decode("utf-8", errors="ignore")
+            summary["extracted_text_preview"] = text[:2000]
+
+        
+        #WordDocs
+        elif mime_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            from docx import Document
+            doc = Document(io.BytesIO(decoded_bytes))
+            text = "\n".join([para.text for para in doc.paragraphs])
+            summary["extracted_text_preview"] = text[:2000]
+        
+        #Excel
+        elif mime_type in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
+            df = pd.read_excel(io.BytesIO(decoded_bytes), nrows=1000)
+            summary.update({
+                "rows_sampled": len(df),
+                "columns": list(df.columns),
+                "sample_rows": df.head(3).to_dict(orient="records")
+            })
+        
+        #PDF
+        elif mime_type == "application/pdf":
+            from pypdf import PdfReader
+            reader = PdfReader(io.BytesIO(decoded_bytes))
+            text = ""
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text+= page_text + '\n'
+            summary["extracted_text_preview"] = text[:2000]
+        
+        #Image
+        elif mime_type and mime_type.startswith("image/"):
+            summary["note"] = "Image saved."
+        
+        else:
+            summary["note"] = "File saved, no analysis or extraction performed."
+    except Exception as e:
+        summary["error"] = str(e)
+    
+    return summary
+
+
 #Grabs relevant information fields from the requested ticket and returns the filtered data. 
 def process_ticket(ticket_id):
         tix_data = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
@@ -54,14 +134,24 @@ def process_ticket(ticket_id):
         
         #Check for attachments, if not present, produce empty array
         ticket_attachments = ticket_data.get("Attachments", [])
+        attachments_data = []
         if ticket_attachments:
-            attachments_data = []
             for attachment in ticket_attachments:
                 attachment_id = attachment.get("ID")
-                att_data = {
+                attachment_name = attachment.get("Name")
+                fetch_att_data = {
                     "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
                     }
-                attachments_data.append(tdx_call(att_data))
+                attachment_response = tdx_call(fetch_att_data)
+
+                if not attachment_response:
+                    continue
+
+                base64_data = attachment_response.strip()
+
+                summary = interpret_attachment(ticket_id, attachment_name, base64_data)
+                attachments_data.append(summary)
+
         else:
             attachments_data = "None"
 
@@ -137,16 +227,17 @@ def main_loop():
             for ticket_id in new_ids:
                 processed = process_ticket(ticket_id)
             
-            if processed:
-                cache["ticket_ids"].append(ticket_id)
-                cache["ticket_data"][ticket_id] = processed
-                save_cache(cache)
-                print(f"Processed and cached ticket {ticket_id}")
+                if processed:
+                    cache["ticket_ids"].append(ticket_id)
+                    cache["ticket_data"][ticket_id] = processed
+                    save_cache(cache)
+                    print(f"Processed and cached ticket {ticket_id}")
         else:
             print("No new tickets found")
 
         #Check every hour for new tickets
         time.sleep(3600)
+        print("Sleeping")
         
 
 if __name__ == "__main__":
