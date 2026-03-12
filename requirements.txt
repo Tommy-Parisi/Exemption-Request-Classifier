@@ -6,3 +6,4 @@ pydantic>=2.0.0
 cryptography>=3.1
 pandas>=2.2.2
 python-docx
+openpyxl
