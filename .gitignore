@@ -3,3 +3,4 @@ myvenv/
 api/individual_exceptions
 api/test.py
 __pycache__
+.rag_cache
