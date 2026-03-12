@@ -13,7 +13,7 @@
 }
 
 .container {
-  @apply max-w-6xl mx-auto bg-white shadow-sm rounded-md mt-10 p-10;
+  @apply max-w-xl mx-auto bg-white shadow-sm rounded-md mt-10 p-10;
 }
 
 /* ====== Header ====== */

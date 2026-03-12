@@ -1,3 +1,4 @@
+
 __pycache__
 .env
 myenv/
@@ -15,3 +16,6 @@ api/weight.json
 attachment.json
 api/filtered_form_output.json
 api/test.py
+
+.rag_cache
+

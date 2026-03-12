@@ -1,10 +1,9 @@
-from pinecone import Pinecone, ServerlessSpec as pc
+from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 import os
 import time
-import csv
 import json
-import re
+import requests
 
 load_dotenv()
 
@@ -12,90 +11,145 @@ pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
 index_name = "exemption-policy"
 
+def get_google_embedding(text, api_key):
+    """Generate embedding using Google's text-embedding-004 model (768 dimensions)."""
+    url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent"
+    headers = {"Content-Type": "application/json"}
+    params = {"key": api_key}
+
+    data = {
+        "model": "models/text-embedding-004",
+        "content": {"parts": [{"text": text}]},
+        "task_type": "RETRIEVAL_DOCUMENT"  # Use RETRIEVAL_DOCUMENT for indexing
+    }
+
+    response = requests.post(url, headers=headers, params=params, json=data, timeout=30)
+    response.raise_for_status()
+
+    result = response.json()
+    embedding = result.get("embedding", {}).get("values", [])
+    return embedding
+
 def initialize_index():
     if not pc.has_index(index_name):
-        pc.create_index_for_model(
+        pc.create_index(
             name=index_name,
-            cloud="aws",
-            region="us-east-1",
-            embed={
-                "model":"llama-text-embed-v2",
-                "field_map":{"text": "chunk_text"}
-            }
+            dimension=768,  # Google text-embedding-004 dimension
+            metric="cosine",
+            spec=ServerlessSpec(
+                cloud="aws",
+                region="us-east-1"
+            )
         )
 
+def build_chunk_text(item):
+    """Build searchable text from policy document fields."""
+    parts = []
+
+    if item.get('control_id'):
+        parts.append(f"Control {item['control_id']}")
+
+    if item.get('risk_area'):
+        parts.append(f"Risk Area: {item['risk_area']}")
+
+    if item.get('classification_levels'):
+        levels = ', '.join(item['classification_levels'])
+        parts.append(f"Data Classification: {levels}")
+
+    if item.get('requirements'):
+        reqs = ' '.join(item['requirements']) if isinstance(item['requirements'], list) else item['requirements']
+        parts.append(reqs)
+
+    if item.get('note'):
+        parts.append(item['note'])
+
+    if item.get('references'):
+        parts.append(f"References: {item['references']}")
+
+    return ' '.join(parts)
+
 def upsert_data():
-    # Load records from data/data.csv
-    records = []
-    csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.csv')
-    csv_path = os.path.normpath(csv_path)
-    if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"CSV file not found: {csv_path}")
+    # Load policy data from JSON
+    json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.json')
 
-    with open(csv_path, encoding='utf-8') as fh:
-        raw = fh.read().strip()
+    with open(json_path, encoding='utf-8') as f:
+        policies = json.load(f)
 
-    # Strip code fences if present
-    if raw.startswith('```'):
-        raw = raw.lstrip('`').rstrip('`').strip()
-    
-    # Find all JSON objects: { ... }
-    pattern = r'\{[^{}]*\}'
-    matches = re.findall(pattern, raw, re.DOTALL)
-    
-    for match in matches:
-        try:
-            item = json.loads(match)
-            rec_id = item.get('_id') or item.get('id')
-            text = item.get('chunk_text') or item.get('text')
-            category = item.get('category')
-            if not rec_id:
-                rec_id = f"rec-{len(records)+1}"
-            records.append({"_id": rec_id, "chunk_text": text or "", "category": category or ""})
-        except Exception as e:
-            print(f"Warning: Failed to parse JSON object: {e}")
+    if not isinstance(policies, list):
+        policies = [policies]  # Handle single object
+
+    print(f"Loaded {len(policies)} policies from JSON")
+
+    # Get Google API key for embeddings
+    google_api_key = os.getenv("LLM_API_KEY")
+    if not google_api_key:
+        raise ValueError("LLM_API_KEY environment variable not set")
+
+    # Generate embeddings and prepare vectors
+    print(f"Generating embeddings using Google text-embedding-004...")
+    vectors_to_upsert = []
+
+    for idx, policy in enumerate(policies):
+        # Build searchable text
+        text = build_chunk_text(policy)
+        if not text:
+            print(f"Warning: Policy {policy.get('_id', idx)} has no text, skipping")
             continue
-    
-    print(f"Loaded {len(records)} records from CSV")
+
+        try:
+            embedding = get_google_embedding(text, google_api_key)
+            if len(embedding) != 768:
+                print(f"Warning: Embedding dimension mismatch for {policy.get('_id')}, skipping")
+                continue
+
+            # Prepare metadata (no None/null values allowed in Pinecone)
+            # Bug 12 fix: store classification_levels as a list so that Pinecone
+            # $in filters work correctly (e.g. {"classification_levels": {"$in": ["III"]}}).
+            # Previously this was collapsed to a single comma-joined string which
+            # made metadata filtering impossible.
+            classification_levels = policy.get("classification_levels", []) or []
+
+            vectors_to_upsert.append({
+                "id": policy.get("_id", f"policy-{idx}"),
+                "values": embedding,
+                "metadata": {
+                    "chunk_text": text,
+                    "control_id": policy.get("control_id") or "",
+                    "risk_area": policy.get("risk_area") or "",
+                    "classification_levels": classification_levels,  # list, not string
+                    "is_exception_related": bool(policy.get("is_exception_related")),
+                    "requires_approval": bool(policy.get("requires_approval")),
+                    "approver_role": policy.get("approver_role") or ""
+                }
+            })
+
+            if (idx + 1) % 10 == 0:
+                print(f"  Processed {idx + 1}/{len(policies)} policies...")
+
+        except Exception as e:
+            print(f"Error processing policy {policy.get('_id')}: {e}")
+            continue
 
     dense_index = pc.Index(index_name)
-    print(f"Upserting {len(records)} records to index '{index_name}'...")
-    dense_index.upsert_records("policy-and-exemption-criterion", records)
+    print(f"Upserting {len(vectors_to_upsert)} vectors to index '{index_name}'...")
 
-    # Poll until the namespace has at least the number of upserted vectors
-    namespace = "policy-and-exemption-criterion"
-    expected_count = len(records)
-    timeout = 60  # seconds
-    interval = 5  # seconds
-    start = time.time()
+    # Upsert in batches of 100
+    batch_size = 100
+    for i in range(0, len(vectors_to_upsert), batch_size):
+        batch = vectors_to_upsert[i:i + batch_size]
+        dense_index.upsert(
+            vectors=batch,
+            namespace="policy-and-exemption-criterion"
+        )
+        print(f"Upserted batch {i // batch_size + 1} ({len(batch)} vectors)")
 
-    print(f"Waiting for {expected_count} vectors to be indexed in namespace '{namespace}'...")
-    while True:
-        try:
-            stats = dense_index.describe_index_stats()
-            
-            vector_count = 0
-            if hasattr(stats, 'namespaces') and namespace in stats.namespaces:
-                ns = stats.namespaces[namespace]
-                vector_count = ns.get('vector_count', 0) if isinstance(ns, dict) else getattr(ns, 'vector_count', 0)
-            
-            print(f"Current vectors in namespace: {vector_count}")
-            if int(vector_count) >= expected_count:
-                print(f"Index ready!")
-                break
-        except Exception as e:
-            # Keep trying until timeout
-            print(f"(polling... error: {type(e).__name__}: {e})")
-            pass
+    print(f"\nSuccessfully upserted {len(vectors_to_upsert)} vectors!")
 
-        if time.time() - start > timeout:
-            raise TimeoutError(f"Timed out waiting for index namespace '{namespace}' to reach {expected_count} vectors")
-
-        time.sleep(interval)
-
-    # Once ready, print stats
+    # Verify indexing
+    print("Verifying index...")
+    time.sleep(2)  # Brief wait for indexing
     stats = dense_index.describe_index_stats()
-    print("Index stats:")
+    print(f"Index stats: {stats}")
 
 def delete_index():
     if pc.has_index(index_name):
