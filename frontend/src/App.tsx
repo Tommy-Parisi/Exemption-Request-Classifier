@@ -1,8 +1,43 @@
 import { useState } from "react";
+import { useRef, useEffect } from "react";
 import './styles/tailwind.css';
+import './App.css';
+import "./styles/tailwind.css";
+
+type FormData = {
+  requestor: string;
+  department: string;
+  exceptionType: string;
+  reason: string;
+  startDate: string;
+  hostnames: string;
+  unitHead: string;
+  riskAssessment: string;
+  impactedSystems: string;
+  dataLevelStored: string;
+  dataAccessLevel: string;
+  vulnScanner: string;
+  edrAllowed: string;
+  managementAccess: string;
+  publicIP: string;
+  osUpToDate: string;
+  osPatchFrequency: string;
+  appPatchFrequency: string;
+  localFirewall: string;
+  networkFirewall: string;
+  dependencyLevel: string;
+  userImpact: string;
+  universityImpact: string;
+  mitigation: string;
+};
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
 
 function App() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     requestor: "",
     department: "",
     exceptionType: "",
@@ -27,6 +62,7 @@ function App() {
     userImpact: "",
     universityImpact: "",
     mitigation: "",
+    attachment: null,
   });
 
   const [response, setResponse] = useState("");
@@ -52,8 +88,47 @@ function App() {
       setResponse("Error: Could not reach backend");
     }
   };
+  
+  {/*Chat Bubble Stuff*/}
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleChat = () => {setIsOpen(!isOpen)};
+
+  {/*User and AI Sent Messages*/}
+  type ChatMessage={text:string; sender: "user"|"AI";};
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+
+  const sendMessage = async () => {
+    if (inputValue.trim() === "") return;
+    setMessages( prev => [...prev, {text: inputValue, sender: "user"}])
+
+    const history = messages.map(msg => ({
+    role: msg.sender === "user" ? "user" : "assistant",
+    content: msg.text
+    }));
+
+    history.push({ role: "user", content: inputValue });
+
+    setInputValue("");
+
+    const aiResponse = await fetch("http://localhost:8000/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message:inputValue, bhistory:[]})
+    });
+    const aiMessage = await aiResponse.json();
+    setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
+  };
+
+  {/*Auto Scroll*/}
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({behavior:"smooth"});
+  }, [messages]);
 
   return (
+    <div>
     <div className="page">
       {/* ===== HEADER ===== */}
       <header className="header">
@@ -80,7 +155,8 @@ function App() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Request Security Exception</h2>
           <p className="text-gray-600 mb-6">All fields marked with an asterisk (*) are required.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-10">
+            <form onSubmit={handleSubmit} className="space-y-6">
             {/* ===== BASIC INFO ===== */}
             <div>
               <label className="label">
@@ -151,6 +227,37 @@ function App() {
                 Risk Assessment Justification <span className="text-red-500">*</span>
               </label>
               <textarea name="riskAssessment" value={formData.riskAssessment} onChange={handleChange} className="textarea h-28" />
+            </div>
+
+            {/* ===== ATTACHMENT FIELD ===== */}
+            <div className="attachment-section">
+              <label className="label flex items-center gap-2">
+                Attachment
+                <span className="text-blue-500 cursor-pointer" title="File attachments associated with the ticket."></span>
+              </label>
+
+              <p className="text-sm text-gray-600 mb-2">
+                File attachments associated with the ticket.
+              </p>
+
+              <div className="attachment-wrapper">
+                <label className="browse-btn">
+                  Browse...
+                  <input
+                    type="file"
+                    name="attachment"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      setFormData({ ...formData, attachment: file || null });
+                    }}
+                  />
+                </label>
+
+                <span className="file-name">
+                  {formData.attachment ? formData.attachment.name : "No file chosen"}
+                </span>
+              </div>
             </div>
 
             {/* ===== DATA LEVELS ===== */}
@@ -456,24 +563,14 @@ function App() {
               </p>
             </div>
 
-            <button
-              type="submit"
-              className="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition font-medium"
-            >
-              Submit
-            </button>
-          </form>
-
-          {response && (
-            <div className="mt-10 border-t pt-6">
-              <h3 className="text-xl font-semibold text-[var(--ud-blue)] mb-2">
-                AI Evaluation
-              </h3>
-              <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                <p className="text-gray-800 whitespace-pre-wrap">{response}</p>
-              </div>
-            </div>
-          )}
+              <button
+                type="submit"
+                className="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition font-medium"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
         </div>
       </main>
 
@@ -485,6 +582,42 @@ function App() {
           IT Security · Policy Exemption Analyzer
         </p>
       </footer>
+    </div>
+    {/* ===== CHAT-BUBBLE ====*/}
+    <div className="chat-bubble" onClick={toggleChat}>💬</div>
+    {/* ==== CHAT-WINDOW ====*/}
+    {isOpen && (
+    <div className="chat-window">
+      <h2 className="chat-window-header">Support Chat</h2>
+      {/* ==== MESSAGE-WINDOW ====*/}
+        <div className="chat-window-textbox">
+          <p className="ai-message">Hello, I am here to assist you through this form. If you have any questions, dont hesitate to ask!</p>
+          {messages.map((msg, index) =>
+          msg.sender === "user" ? (
+            <div key={index} className="user-message">
+              {msg.text}
+            </div>
+          ) : (
+            <div key={index} className="ai-message">
+              {msg.text}
+            </div>
+          )
+          )}
+            {/* ==== AUTO-SCROLL ====*/}
+            <div ref={messagesEndRef}/>
+        </div>
+        {/* ==== IPUT-WINDOW ====*/}
+        <div className="chat-input">
+          <input type="text" className="chat-input-box" 
+          placeholder="Type here..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          />
+          <button className="chat-input-button">Send</button>
+        </div>
+    </div>
+    )}
     </div>
   );
 }

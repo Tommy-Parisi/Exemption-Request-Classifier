@@ -1,1 +1,22 @@
+
+__pycache__
+*.pyc
 .env
+myenv/
+.DS_Store
+
+# Ticket Data
+api/all_exceptions.json
+api/individual_exceptions
+api/exceptions_attachment_*.json
+api/exceptions.json
+api/all_tickets.json
+api/ticket_cache.json
+attachments/
+api/weight.json
+attachment.json
+api/filtered_form_output.json
+api/test.py
+
+.rag_cache
+
