@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useRef, useEffect } from "react";
 import './styles/tailwind.css';
 import './App.css';
-import "./styles/tailwind.css";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 type FormData = {
   requestor: string;
@@ -29,6 +30,7 @@ type FormData = {
   userImpact: string;
   universityImpact: string;
   mitigation: string;
+  attachment: File | null;
 };
 
 type ChatMessage = {
@@ -77,7 +79,7 @@ function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -111,10 +113,10 @@ function App() {
 
     setInputValue("");
 
-    const aiResponse = await fetch("http://localhost:8000/chat", {
+    const aiResponse = await fetch(`${API_BASE}/chat/message`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({message:inputValue, bhistory:[]})
+      body: JSON.stringify({message: inputValue, history, formData})
     });
     const aiMessage = await aiResponse.json();
     setMessages(prev => [...prev, {text:aiMessage.reply, sender: "AI"}]);
@@ -614,7 +616,7 @@ function App() {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
-          <button className="chat-input-button">Send</button>
+          <button className="chat-input-button" onClick={sendMessage}>Send</button>
         </div>
     </div>
     )}

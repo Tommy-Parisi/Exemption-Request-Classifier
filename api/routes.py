@@ -14,6 +14,7 @@ import os
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
+from services.llm_service import chat_with_form_data
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,10 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
+
+# Maps the integer data level used by the risk scorer back to the Roman numeral
+# strings stored in the Pinecone metadata (e.g. classification_levels: ["I","II","III"]).
+DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
     "Monthly": "monthly",
@@ -180,7 +185,9 @@ def build_rag_request(form: ExceptionForm, scorer_data: dict, request_id: str) -
     return {
         "id": request_id,
         "exception_type": (form.exceptionType or "other").lower(),
-        "data_level": scorer_data["data_stored_level"],
+        # Pinecone metadata stores classification_levels as Roman numeral strings
+        # ("I", "II", "III"), so convert the integer level before filtering.
+        "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
 
@@ -306,4 +313,30 @@ async def chat(form: ExceptionForm, request: Request):
 
     # Step 5: format and return
     reply = format_reply(score_result, decision, compliance, narrative, rag_ok)
+    return {"reply": reply}
+
+
+# ---------------------------------------------------------------------------
+# Chat assistant endpoint
+# ---------------------------------------------------------------------------
+
+class ChatMessageRequest(BaseModel):
+    message: str
+    history: Optional[list] = None
+    formData: Optional[ExceptionForm] = None
+
+
+@app.post("/chat/message")
+async def chat_message(body: ChatMessageRequest):
+    """Conversational assistant endpoint for the chat bubble.
+
+    Accepts a user message and optional conversation history + current form data,
+    and returns a context-aware reply from the Gemini-powered chat assistant.
+    """
+    form_dict = body.formData.model_dump(exclude_none=True) if body.formData else None
+    reply = chat_with_form_data(
+        message=body.message,
+        form_data=form_dict,
+        history=body.history or [],
+    )
     return {"reply": reply}

@@ -65,7 +65,7 @@ class RAGIntegrator:
 
         self.pinecone_api_key = pinecone_api_key or os.getenv("PINECONE_API_KEY")
         self.pinecone_env = pinecone_env or os.getenv("PINECONE_ENV")
-        self.pinecone_index_name = pinecone_index or os.getenv("PINECONE_INDEX", "policies")
+        self.pinecone_index_name = pinecone_index or os.getenv("PINECONE_INDEX", "exemption-policy")
         self.llm_api_key = llm_api_key or os.getenv("LLM_API_KEY")
         self.llm_api_url = llm_api_url or os.getenv("LLM_API_URL") or "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
         self.llm_temperature = llm_temperature
