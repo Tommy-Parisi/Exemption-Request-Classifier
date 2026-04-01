@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+import os
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
@@ -96,9 +97,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:4173"],
+    allow_origins=_allowed_origins,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
