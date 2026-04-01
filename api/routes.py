@@ -19,6 +19,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
+# Maps the integer data level used by the risk scorer back to the Roman numeral strings.
 DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
@@ -296,6 +297,27 @@ async def chat_endpoint(request: ChatRequest, raw_request: Request):
 
     reply = format_reply(score_result, decision, compliance, narrative, rag_ok)
     return {"reply": reply}
+
+
+class ChatMessageRequest(BaseModel):
+    message: str
+    history: List[ChatMessage] = Field(default_factory=list)
+    formData: Optional[ChatRequest] = None
+
+
+@app.post("/chat/message")
+async def chat_message_endpoint(body: ChatMessageRequest):
+    form_data = {}
+    if body.formData:
+        form_data = body.formData.model_dump(exclude_none=True, exclude={"history"})
+        form_data.pop("message", None)
+    history = [message_item.model_dump() for message_item in body.history]
+
+    try:
+        reply = chat_with_form_data(message=body.message, form_data=form_data, history=history)
+        return {"reply": reply}
+    except Exception as exc:
+        return {"reply": f"Error processing request: {str(exc)}"}
 
 
 @app.get("/health")
