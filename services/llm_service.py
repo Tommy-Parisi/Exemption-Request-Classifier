@@ -1,11 +1,13 @@
+import logging
 from dotenv import load_dotenv
 from openai import OpenAI
 from pypdf import PdfReader
 import gradio as gr
 import os
 
+logger = logging.getLogger(__name__)
+
 load_dotenv(override=True)
-# openai = OpenAI()
 
 # Get the directory where this file is located
 _current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -82,11 +84,6 @@ def evaluate(reply, message, history) -> Evaluation:
     )
     return response.choices[0].message.parsed
 
-# Test code (commented out - uncomment to test evaluation)
-# messages = [{"role": "system", "content": system_prompt}] + [{"role": "user", "content": "do you hold a patent?"}]
-# response = openai.chat.completions.create(model="gpt-4o-mini", messages=messages)
-# reply = response.choices[0].message.content
-# print(evaluate(reply, "do you hold a patent?", messages))
 
 def rerun(reply, message, history, feedback):
     updated_system_prompt = system_prompt + "\n\n## Previous answer rejected\nYou just tried to reply, but the quality control rejected your reply\n"
@@ -200,10 +197,9 @@ def chat(message, history):
     evaluation = evaluate(reply, message, normalized_history)
     
     if evaluation.is_acceptable:
-        print("Passed evaluation - returning reply")
+        logger.debug("Response passed evaluation")
     else:
-        print("Failed evaluation - retrying")
-        print(evaluation.feedback)
+        logger.warning("Response failed evaluation, retrying. Feedback: %s", evaluation.feedback)
         reply = rerun(reply, message, normalized_history, evaluation.feedback)       
     return reply
 
@@ -223,10 +219,9 @@ def chat_with_form_data(message: str, form_data: dict = None, history: list = No
     evaluation = evaluate(reply, message, normalized_history)
     
     if evaluation.is_acceptable:
-        print("Passed evaluation - returning reply")
+        logger.debug("Response passed evaluation")
     else:
-        print("Failed evaluation - retrying")
-        print(evaluation.feedback)
+        logger.warning("Response failed evaluation, retrying. Feedback: %s", evaluation.feedback)
         reply = rerun(reply, message, normalized_history, evaluation.feedback)       
     return reply
 

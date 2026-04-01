@@ -1,3 +1,4 @@
+import logging
 from pinecone import Pinecone, ServerlessSpec
 from dotenv import load_dotenv
 import os
@@ -7,9 +8,11 @@ import requests
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 
-index_name = "exemption-policy"
+index_name = os.getenv("PINECONE_INDEX", "exemption-policy")
 
 def get_google_embedding(text, api_key):
     """Generate embedding using Google's text-embedding-004 model (768 dimensions)."""
@@ -78,7 +81,7 @@ def upsert_data():
     if not isinstance(policies, list):
         policies = [policies]  # Handle single object
 
-    print(f"Loaded {len(policies)} policies from JSON")
+    logger.info("Loaded %d policies from JSON", len(policies))
 
     # Get Google API key for embeddings
     google_api_key = os.getenv("LLM_API_KEY")
@@ -86,20 +89,20 @@ def upsert_data():
         raise ValueError("LLM_API_KEY environment variable not set")
 
     # Generate embeddings and prepare vectors
-    print(f"Generating embeddings using Google text-embedding-004...")
+    logger.info("Generating embeddings using Google text-embedding-004...")
     vectors_to_upsert = []
 
     for idx, policy in enumerate(policies):
         # Build searchable text
         text = build_chunk_text(policy)
         if not text:
-            print(f"Warning: Policy {policy.get('_id', idx)} has no text, skipping")
+            logger.warning("Policy %s has no text, skipping", policy.get('_id', idx))
             continue
 
         try:
             embedding = get_google_embedding(text, google_api_key)
             if len(embedding) != 768:
-                print(f"Warning: Embedding dimension mismatch for {policy.get('_id')}, skipping")
+                logger.warning("Embedding dimension mismatch for policy %s, skipping", policy.get('_id'))
                 continue
 
             # Prepare metadata (no None/null values allowed in Pinecone)
@@ -124,14 +127,14 @@ def upsert_data():
             })
 
             if (idx + 1) % 10 == 0:
-                print(f"  Processed {idx + 1}/{len(policies)} policies...")
+                logger.info("Processed %d/%d policies...", idx + 1, len(policies))
 
         except Exception as e:
-            print(f"Error processing policy {policy.get('_id')}: {e}")
+            logger.error("Error processing policy %s: %s", policy.get('_id'), e)
             continue
 
     dense_index = pc.Index(index_name)
-    print(f"Upserting {len(vectors_to_upsert)} vectors to index '{index_name}'...")
+    logger.info("Upserting %d vectors to index '%s'...", len(vectors_to_upsert), index_name)
 
     # Upsert in batches of 100
     batch_size = 100
@@ -141,27 +144,27 @@ def upsert_data():
             vectors=batch,
             namespace="policy-and-exemption-criterion"
         )
-        print(f"Upserted batch {i // batch_size + 1} ({len(batch)} vectors)")
+        logger.info("Upserted batch %d (%d vectors)", i // batch_size + 1, len(batch))
 
-    print(f"\nSuccessfully upserted {len(vectors_to_upsert)} vectors!")
+    logger.info("Successfully upserted %d vectors", len(vectors_to_upsert))
 
     # Verify indexing
-    print("Verifying index...")
+    logger.info("Verifying index...")
     time.sleep(2)  # Brief wait for indexing
     stats = dense_index.describe_index_stats()
-    print(f"Index stats: {stats}")
+    logger.info("Index stats: %s", stats)
 
 def delete_index():
     if pc.has_index(index_name):
         pc.delete_index(index_name)
 
 def main():
-    print("Initializing index...")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logger.info("Initializing index...")
     initialize_index()
-    print("Upserting data...")
+    logger.info("Upserting data...")
     upsert_data()
-    print("Done!")
-    # delete_index()
+    logger.info("Done!")
 
 if __name__ == "__main__":
     main()

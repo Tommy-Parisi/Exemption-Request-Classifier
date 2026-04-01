@@ -37,6 +37,13 @@ FIREWALL_MAP = {
     "No Coverage": "no",
 }
 
+EXCEPTION_TYPE_MAP = {
+    "firewall": "security",
+    "identity": "identity",
+    "vulnerability": "vulnerability",
+    "other": "other",
+}
+
 IMPACT_MAP = {
     "Low": "low",
     "Moderate": "moderate",
@@ -129,6 +136,10 @@ class ChatRequest(BaseModel):
     history: List[ChatMessage] = Field(default_factory=list)
 
 
+def _mapped_exception_type(value: Optional[str]) -> str:
+    return EXCEPTION_TYPE_MAP.get((value or "other").lower(), "other")
+
+
 def map_form_to_scorer(form: ChatRequest) -> dict:
     return {
         "data_stored_level": DATA_LEVEL_MAP.get(form.dataLevelStored or "", 2),
@@ -145,6 +156,7 @@ def map_form_to_scorer(form: ChatRequest) -> dict:
         "server_dependencies": IMPACT_MAP.get(form.dependencyLevel or "", "low"),
         "user_dependencies": IMPACT_MAP.get(form.userImpact or "", "low"),
         "university_importance": UNIVERSITY_MAP.get(form.universityImpact or "", "low"),
+        "exception_type": _mapped_exception_type(form.exceptionType),
     }
 
 
@@ -165,7 +177,7 @@ def build_rag_request(form: ChatRequest, scorer_data: dict, request_id: str) -> 
 
     return {
         "id": request_id,
-        "exception_type": (form.exceptionType or "other").lower(),
+        "exception_type": scorer_data["exception_type"],
         "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
@@ -207,6 +219,9 @@ def format_reply(
         f"  Patch Management:      {breakdown['patch_management']}/10",
         f"  Impact Assessment:     {breakdown['impact_assessment']}/10",
         "",
+        "ROUTING & APPROVAL",
+        f"  Team: {decision.get('routing') or 'N/A'}",
+        f"  Approvers Required: {', '.join(decision.get('approval_required', [])) or 'N/A'}",
         f"  Maximum Duration: {duration}",
     ]
 
