@@ -10,7 +10,7 @@ This script demonstrates ONE exception request flowing through the ENTIRE pipeli
 5. Risk Narrative Generation
 6. Decision Engine Recommendation
 
-This demnonstrates the production workflow
+This demonstrates the production workflow
 """
 
 import os

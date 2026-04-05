@@ -24,8 +24,6 @@ TDX_API_KEY: str | None = os.getenv("TDX_API_KEY")
 # ---------------------------------------------------------------------------
 
 GOOGLE_API_KEY: str | None = os.getenv("GOOGLE_API_KEY")
-# GOOGLE_API_KEY_2 is used by llm_service.py for the Gemini chat/eval models.
-GOOGLE_API_KEY_2: str | None = os.getenv("GOOGLE_API_KEY_2")
 LLM_API_KEY: str | None = os.getenv("LLM_API_KEY")
 LLM_API_URL: str = os.getenv(
     "LLM_API_URL",

@@ -43,17 +43,10 @@ A deterministic algorithm scores the request from 0–100 across five categories
 - Score > 90 → Auto-Deny
 
 ### 2. Decision Engine (`engine/decision_engine.py`)
-Takes the risk score and exception type, then outputs:
+Takes the risk score and outputs:
 - **Recommendation**: APPROVE / REVIEW / DENY
-- **Routing**: which team should handle the review (IAM, SecOps, or GRC)
-- **Approvers required**: Unit Head + the relevant team
 - **Conditions**: any remediation requirements (e.g., "must implement quarterly patching")
 - **Max duration**: how long the exception can last (up to 365 days for approvals, 180 for reviews)
-
-Routing logic:
-- Identity/Access exceptions → IAM Team
-- Firewall/Vulnerability exceptions → SecOps Team
-- Everything else → GRC Team
 
 ### 3. RAG Policy Compliance Check (`engine/rag_integration.py`)
 This is where the AI comes in. The system searches a Firestore vector database of 79+ university IT security policies using hybrid search (semantic similarity + keyword matching). The top matching policies are retrieved and sent to **Gemini 2.0 Flash** along with the exception request details. The LLM returns:

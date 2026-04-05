@@ -61,17 +61,15 @@ def evaluator_user_prompt(reply, message, history):
     return user_prompt
 
 def _get_gemini_client():
-    gemini_api_key = os.getenv("GOOGLE_API_KEY_2") or os.getenv("GOOGLE_API_KEY")
+    gemini_api_key = os.getenv("GOOGLE_API_KEY")
     if not gemini_api_key:
-        raise ValueError(
-            "GOOGLE_API_KEY_2 or GOOGLE_API_KEY environment variable is required for Gemini access."
-        )
+        raise ValueError("GOOGLE_API_KEY environment variable is required for Gemini access.")
     return OpenAI(
         api_key=gemini_api_key,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
     )
 
-GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-3-pro-preview")
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
 GEMINI_EVAL_MODEL = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 def evaluate(reply, message, history) -> Evaluation:
