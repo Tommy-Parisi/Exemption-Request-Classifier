@@ -129,9 +129,9 @@ def interpret_attachment(ticket_id, attachment_name, base64_data):
 
 #Grabs relevant information fields from the requested ticket and returns the filtered data. 
 def process_ticket(ticket_id):
-        tix_data = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
+        request_header = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
         
-        ticket_data = tdx_call(tix_data)
+        ticket_data = tdx_call(request_header)
         if not ticket_data:
             print("Cannot find ticket based on ID")
             return None
@@ -143,10 +143,10 @@ def process_ticket(ticket_id):
             for attachment in ticket_attachments:
                 attachment_id = attachment.get("ID")
                 attachment_name = attachment.get("Name")
-                fetch_att_data = {
+                attachment_header = {
                     "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
                     }
-                attachment_response = tdx_call(fetch_att_data)
+                attachment_response = tdx_call(attachment_header)
 
                 if not attachment_response:
                     continue
