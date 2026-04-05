@@ -389,8 +389,6 @@ def run_end_to_end_pipeline():
     print(f"\n[RESULT] Decision Engine Output:")
     print(f"         Recommendation: {decision['recommendation']}")
     print(f"         Approval Status: {decision['approval_status']}")
-    print(f"         Routing: {decision['routing']} Team")
-    print(f"         Approval Required: {', '.join(decision['approval_required'])}")
 
     if decision['max_duration']:
         print(f"         Maximum Duration: {decision['max_duration']} days")
@@ -401,11 +399,6 @@ def run_end_to_end_pipeline():
         print(f"\n         Conditions ({len(decision['conditions'])}):")
         for i, condition in enumerate(decision['conditions'], 1):
             print(f"            {i}. {condition}")
-
-    if decision['reasoning']:
-        print(f"\n         Reasoning:")
-        for reason in decision['reasoning']:
-            print(f"            {reason}")
 
     # ========================================
     # STEP 6: Final Summary
@@ -423,17 +416,30 @@ def run_end_to_end_pipeline():
     print(f"\nPolicy Analysis:")
     print(f"   Policies Found: {len(policy_search_results)}")
     print(f"   Compliance Status: {compliance_status}")
-    print(f"   Required Controls: {len(required_controls)}")
+    if required_controls:
+        print(f"   Required Controls:")
+        for ctrl in required_controls:
+            print(f"      - {ctrl}")
 
     print(f"\nRisk Assessment:")
     print(f"   Risk Score: {risk_score}/100 ({risk_level})")
 
     print(f"\nDecision:")
     print(f"   Recommendation: {decision['recommendation']}")
-    print(f"   Approval Required: {', '.join(decision['approval_required'])}")
-    print(f"   Routing: {decision['routing']} Team")
+    if decision.get('conditions'):
+        print(f"   Conditions:")
+        for cond in decision['conditions']:
+            print(f"      - {cond}")
 
-    print("\n" + "=" * 80)
+    if narrative and narrative != "Risk narrative generation failed.":
+        print(f"\nExecutive Risk Narrative:")
+        for paragraph in narrative.split('\n\n'):
+            if paragraph.strip():
+                for line in paragraph.strip().split('\n'):
+                    print(f"   {line}")
+                print()
+
+    print("=" * 80)
 
     # ========================================
     # Cleanup
