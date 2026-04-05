@@ -211,10 +211,6 @@ def run_end_to_end_pipeline():
     print(f"Data level: {exception_request['data_level']}")
 
     try:
-        # NOTE: The Pinecone index uses 'classification_levels': 'I, II, III' (string)
-        # not 'classification_level': 3 (int), so we don't use metadata filters.
-        # The semantic search and keywords will find the right policies anyway.
-
         # Build search query that includes data level
         search_query = f"{exception_request['exception_type']} {exception_request['data_level']}"
 
