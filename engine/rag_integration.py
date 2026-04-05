@@ -269,7 +269,7 @@ class RAGIntegrator:
         return matches
 
     def _apply_metadata_filter(self, matches: List[PolicyMatch], metadata_filter: Dict[str, Any]) -> List[PolicyMatch]:
-        """Post-filter PolicyMatch results based on a Pinecone-style filter dict."""
+        """Post-filter PolicyMatch results based on a metadata filter dict."""
         filtered = []
         for match in matches:
             if self._matches_filter(match.metadata, metadata_filter):

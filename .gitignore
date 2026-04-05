@@ -3,7 +3,12 @@ __pycache__
 *.pyc
 .env
 myenv/
+myvenv/
+venv/
 .DS_Store
+
+# GCP service account credentials
+capstone-489617-d5624dae18d3.json
 
 # Ticket Data
 api/all_exceptions.json
