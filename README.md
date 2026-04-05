@@ -28,14 +28,6 @@ api/routes.py          ← FastAPI application, CORS, lifespan
 | 16 – 90 | Requires Review |
 | > 90 | Auto-Deny |
 
-### Approval Routing
-
-| Exception Type | Routed To |
-|----------------|-----------|
-| Identity / IAM / Access | IAM Team |
-| Security / Vulnerability / SecOps | SecOps Team |
-| All others | GRC Team |
-
 ---
 
 ## Quick Setup

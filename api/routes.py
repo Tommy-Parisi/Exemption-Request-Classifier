@@ -233,9 +233,6 @@ def format_reply(
         f"  Patch Management:      {bd['patch_management']}/10",
         f"  Impact Assessment:     {bd['impact_assessment']}/10",
         "",
-        "ROUTING & APPROVAL",
-        f"  Team: {decision['routing']} Team",
-        f"  Approvers Required: {', '.join(decision['approval_required'])}",
         f"  Maximum Duration: {duration}",
     ]
 
