@@ -35,11 +35,12 @@ GEMINI_CHAT_MODEL: str = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
 GEMINI_EVAL_MODEL: str = os.getenv("GEMINI_EVAL_MODEL", GEMINI_CHAT_MODEL)
 
 # ---------------------------------------------------------------------------
-# Pinecone Vector Database
+# Firestore Vector Database
 # ---------------------------------------------------------------------------
 
-PINECONE_API_KEY: str | None = os.getenv("PINECONE_API_KEY")
-PINECONE_INDEX: str = os.getenv("PINECONE_INDEX", "exemption-policy")
+GOOGLE_CLOUD_PROJECT: str | None = os.getenv("GOOGLE_CLOUD_PROJECT")
+FIRESTORE_DATABASE: str = os.getenv("FIRESTORE_DATABASE", "policies")
+FIRESTORE_COLLECTION: str = os.getenv("FIRESTORE_COLLECTION", "policies")
 
 # ---------------------------------------------------------------------------
 # Server
