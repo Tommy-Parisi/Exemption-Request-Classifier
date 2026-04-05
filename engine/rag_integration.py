@@ -185,7 +185,7 @@ class RAGIntegrator:
             except Exception as e:
                 logger.warning("Failed to generate embedding via Google API: %s", e)
 
-        # Bug 11 fix: do NOT silently fall back to a pseudo-random vector.
+        # Do NOT silently fall back to a pseudo-random vector.
         logger.error(
             "Embedding generation failed (API unavailable or key missing). "
             "Refusing to use a pseudo-random fallback vector that would produce "

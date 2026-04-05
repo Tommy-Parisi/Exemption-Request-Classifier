@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
 
 # Maps the integer data level used by the risk scorer back to the Roman numeral
-# strings stored in the Pinecone metadata (e.g. classification_levels: ["I","II","III"]).
+# strings stored in Firestore (e.g. classification_levels: ["I","II","III"]).
 DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
@@ -44,13 +44,6 @@ FIREWALL_MAP = {
     "No Coverage": "no",
 }
 
-# Maps frontend exceptionType → decision engine routing string
-EXCEPTION_TYPE_MAP = {
-    "firewall": "security",
-    "identity": "identity",
-    "vulnerability": "vulnerability",
-    "other": "other",
-}
 
 IMPACT_MAP = {
     "Low": "low",
@@ -185,8 +178,7 @@ def build_rag_request(form: ExceptionForm, scorer_data: dict, request_id: str) -
     return {
         "id": request_id,
         "exception_type": (form.exceptionType or "other").lower(),
-        # Pinecone metadata stores classification_levels as Roman numeral strings
-        # ("I", "II", "III"), so convert the integer level before filtering.
+        # Firestore stores classification_levels as Roman numeral strings ("I", "II", "III").
         "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
@@ -278,13 +270,7 @@ async def chat(form: ExceptionForm, request: Request):
     scorer_data = map_form_to_scorer(form)
     score_result = calculate_risk_score(scorer_data)
 
-    engine_type = EXCEPTION_TYPE_MAP.get(
-        (form.exceptionType or "other").lower(), "other"
-    )
-    decision = make_exception_decision(
-        score_result["total"],
-        {**scorer_data, "exception_type": engine_type},
-    )
+    decision = make_exception_decision(score_result["total"], scorer_data)
 
     # Step 4: RAG (blocking I/O — run in executor)
     compliance = None

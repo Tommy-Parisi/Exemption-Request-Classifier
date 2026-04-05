@@ -7,8 +7,8 @@ The Retrieval-Augmented Generation (RAG) system enhances the Security Exception 
 ## System Components
 
 ### 1. Core Infrastructure
-- **Vector Database**: Pinecone cloud-hosted vector database
-- **Embedding Model**: Google Gemini embedding API (768-dimensional vectors)
+- **Vector Database**: Google Cloud Firestore (native vector search)
+- **Embedding Model**: Google `gemini-embedding-001` API (768-dimensional vectors)
 - **Language Model**: Google Gemini 2.0-flash (non-reasoning model)
 - **Policy Corpus**: 79 university security policies with NIST SP 800-53 references
 
@@ -33,8 +33,8 @@ University Policy Documents → Text Extraction → Chunking → Embedding Gener
 1. **Document Parsing**: Extract text content from policy documents
 2. **Text Chunking**: Break documents into semantic chunks (typically 512-1024 tokens)
 3. **Metadata Enrichment**: Add policy categories, NIST mappings, and identifiers
-4. **Embedding Generation**: Create 768-dimensional vectors using Google Gemini text-embedding-004 API
-5. **Vector Storage**: Store embeddings in Pinecone with metadata in 'policy-and-exemption-criterion' namespace
+4. **Embedding Generation**: Create 768-dimensional vectors using Google `gemini-embedding-001` API
+5. **Vector Storage**: Store embeddings in Firestore `policies` collection with metadata
 
 **Outputs:**
 - Searchable vector database with 79 indexed policies
@@ -57,7 +57,7 @@ Exception Request → Query Formation → Hybrid Search → Relevant Policies
 1. **Query Processing**: Clean and normalize input text
 2. **Embedding Generation**: Convert query to 768-dimensional vector
 3. **Hybrid Search Execution**:
-   - Vector similarity search in Pinecone
+   - Vector similarity search in Firestore (`find_nearest`)
    - Keyword matching for specific policy references
    - Relevance score calculation (0.0 - 1.0 scale)
 4. **Result Ranking**: Order by relevance score and metadata matching
@@ -193,8 +193,8 @@ Risk Narratives → Report Generation → Management Dashboard
                               ▼
                        ┌──────────────────┐
                        │ Policy Database  │
-                       │ (Pinecone Vector │
-                       │ Store + Metadata)│
+                       │ (Firestore       │
+                       │ Vector Store)    │
                        └──────────────────┘
                               │
                               ▼
@@ -349,16 +349,18 @@ def generate_executive_report(request_data, analysis_results):
 
 ### Environment Variables
 ```bash
-PINECONE_API_KEY=<pinecone_api_key>
-PINECONE_INDEX=exemption-policy
+GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+FIRESTORE_DATABASE=policies
+FIRESTORE_COLLECTION=policies
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 LLM_API_KEY=<google_gemini_api_key>
 LLM_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
 ```
 
 ### Dependencies
 ```
-pinecone>=7.0.0
-requests>=2.31.0
+google-cloud-firestore>=2.16.0
+requests>=2.28.0
 python-dotenv>=1.0.0
 ```
 
