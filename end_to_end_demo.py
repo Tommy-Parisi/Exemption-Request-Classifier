@@ -182,7 +182,7 @@ def run_end_to_end_pipeline():
 
     # Check environment
     print("\nChecking environment configuration...")
-    required_vars = ['PINECONE_API_KEY', 'LLM_API_KEY']
+    required_vars = ['GOOGLE_CLOUD_PROJECT', 'LLM_API_KEY']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
 
     if missing_vars:
@@ -197,7 +197,7 @@ def run_end_to_end_pipeline():
         rag = RAGIntegrator()
         print(f"[SUCCESS] RAG system initialized")
         print(f"          Index dimension: {rag._index_dimension}")
-        print(f"          Pinecone namespace: '{rag._default_namespace}'")
+        print(f"          Firestore collection: '{rag._default_namespace}'")
     except Exception as e:
         print(f"[ERROR] Failed to initialize RAG system: {e}")
         return False
@@ -209,8 +209,6 @@ def run_end_to_end_pipeline():
 
     print(f"\nSearching for policies relevant to: '{exception_request['exception_type']}'")
     print(f"Data level: {exception_request['data_level']}")
-    print(f"Note: Not using metadata filter since Pinecone uses 'classification_levels' (string)")
-    print(f"      instead of 'classification_level' (int). Semantic search will find relevant policies.")
 
     try:
         # NOTE: The Pinecone index uses 'classification_levels': 'I, II, III' (string)

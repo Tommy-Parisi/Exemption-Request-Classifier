@@ -14,9 +14,9 @@ api/routes.py          ← FastAPI application, CORS, lifespan
         │
         ├── engine/risk_scorer.py      ← Weighted risk score (0–100)
         ├── engine/decision_engine.py  ← Approval routing (IAM / SecOps / GRC)
-        └── engine/rag_integration.py  ← Policy compliance via Pinecone + Gemini
+        └── engine/rag_integration.py  ← Policy compliance via Firestore + Gemini
                 │
-                ├── database/vector_db.py   ← Pinecone upsert utility (run once)
+                ├── database/vector_db.py   ← Firestore upsert utility (run once)
                 └── services/llm_service.py ← Gemini chat assistant (form helper)
 ```
 
@@ -56,13 +56,44 @@ cp .env.example .env
 
 Open `.env` and fill in your real API keys. See the [Environment Variables](#environment-variables) section below for a full reference. **Never commit `.env` to version control.**
 
-### 3. Populate the Pinecone vector index (one-time setup)
+### 3. Set up Google Cloud Firestore (one-time setup)
+
+Firestore is used as the vector database for policy retrieval.
+
+**a. Enable billing on your GCP project**
+
+Firestore requires a billing-enabled GCP project. Contact your Google Workspace administrator to link a billing account, or visit:
+```
+https://console.cloud.google.com/billing/enable?project=YOUR_PROJECT_ID
+```
+
+**b. Create a Firestore database**
+
+Visit the GCP Console and create a Firestore database:
+```
+https://console.cloud.google.com/datastore/setup?project=YOUR_PROJECT_ID
+```
+Select **Native mode**, choose a region, and leave the database ID as **`(default)`**.
+
+Alternatively, use the Firebase Console (free Spark plan) at **console.firebase.google.com**.
+
+**c. Create a service account and download credentials**
+
+1. Go to **IAM & Admin → Service Accounts** in the GCP Console
+2. Create a service account with the **Cloud Datastore User** role
+3. Under **Keys**, click **Add Key → JSON** and download the file
+4. Add to your `.env`:
+   ```
+   GOOGLE_APPLICATION_CREDENTIALS = /path/to/service_account.json
+   ```
+
+**d. Populate the Firestore collection (one-time)**
 
 ```bash
 python database/vector_db.py
 ```
 
-This reads `data/data.json`, generates embeddings via Google's `text-embedding-004` model, and upserts vectors into your Pinecone index.
+This reads `data/data.json`, generates embeddings via Google's `text-embedding-004` model, and writes the policy documents (with vector embeddings) into your Firestore `policies` collection. Only needs to be re-run if the policy data changes.
 
 ### 4. Start the API server
 
@@ -90,8 +121,9 @@ All configuration is driven by environment variables. See `.env.example` for a c
 | `LLM_API_URL` | No | Gemini 2.0 Flash endpoint | Override LLM endpoint |
 | `GEMINI_CHAT_MODEL` | No | `gemini-2.5-flash` | Model used for chat responses |
 | `GEMINI_EVAL_MODEL` | No | same as `GEMINI_CHAT_MODEL` | Model used for response evaluation |
-| `PINECONE_API_KEY` | Yes | — | Pinecone API key |
-| `PINECONE_INDEX` | No | `exemption-policy` | Pinecone index name |
+| `GOOGLE_CLOUD_PROJECT` | Yes | — | GCP project ID hosting the Firestore database |
+| `FIRESTORE_COLLECTION` | No | `policies` | Firestore collection name for policy documents |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Yes | — | Path to GCP service account JSON key file |
 | `TDX_API_URL` | Yes | — | Full TeamDynamix flow API URL |
 | `TDX_API_KEY` | Yes | — | TeamDynamix API key |
 | `SERVER_HOST` | No | `0.0.0.0` | Host to bind when using `python main.py` |
@@ -149,10 +181,10 @@ Evaluates a security exception request form submission.
 │   ├── routes.py          # FastAPI app, endpoints, field mapping helpers
 │   └── tdx.py             # TeamDynamix ticket polling and processing loop
 ├── database/
-│   └── vector_db.py       # Pinecone index setup and data upsert utility
+│   └── vector_db.py       # Firestore collection setup and data upsert utility
 ├── engine/
 │   ├── decision_engine.py # Approval routing logic
-│   ├── rag_integration.py # RAG pipeline (Pinecone retrieval + Gemini generation)
+│   ├── rag_integration.py # RAG pipeline (Firestore retrieval + Gemini generation)
 │   └── risk_scorer.py     # Weighted risk score calculation
 ├── services/
 │   └── llm_service.py     # Gemini-powered chat assistant for form guidance
@@ -171,7 +203,7 @@ Evaluates a security exception request form submission.
 
 ## Testing
 
-Run the RAG integration test suite (requires a populated Pinecone index and valid API keys):
+Run the RAG integration test suite (requires a populated Firestore collection and valid API keys):
 
 ```bash
 source venv/bin/activate
