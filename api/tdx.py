@@ -36,7 +36,11 @@ cache_file = "api/ticket_cache.json"
 #If the json file doesn't exist, create the file with ticket_ids and ticket_data fields, else return the file data
 def load_cache():
     if not os.path.exists(cache_file):
-        return {"ticket_ids":[], "ticket_data":{}}
+        default_cache = {"ticket_ids":[], "ticket_data":{}}
+        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+        with open(cache_file, "w") as f:
+            json.dump(default_cache, f, indent=4)
+        return default_cache
     
     with open(cache_file, "r") as f:
         return json.load(f)
@@ -128,9 +132,9 @@ def interpret_attachment(ticket_id, attachment_name, base64_data):
 
 #Grabs relevant information fields from the requested ticket and returns the filtered data. 
 def process_ticket(ticket_id):
-        tix_data = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
+        request_header = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
         
-        ticket_data = tdx_call(tix_data)
+        ticket_data = tdx_call(request_header)
         if not ticket_data:
             logger.warning("No ticket data returned for ticket ID: %s", ticket_id)
             return None
@@ -142,10 +146,10 @@ def process_ticket(ticket_id):
             for attachment in ticket_attachments:
                 attachment_id = attachment.get("ID")
                 attachment_name = attachment.get("Name")
-                fetch_att_data = {
+                attachment_header = {
                     "Method": "Get_Attachment", "TicketID": str(ticket_id), "AttachmentID": str(attachment_id)
                     }
-                attachment_response = tdx_call(fetch_att_data)
+                attachment_response = tdx_call(attachment_header)
 
                 if not attachment_response:
                     continue
