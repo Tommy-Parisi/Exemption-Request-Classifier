@@ -10,7 +10,7 @@ This script demonstrates ONE exception request flowing through the ENTIRE pipeli
 5. Risk Narrative Generation
 6. Decision Engine Recommendation
 
-This demnonstrates the production workflow
+This demonstrates the production workflow
 """
 
 import os
@@ -182,7 +182,7 @@ def run_end_to_end_pipeline():
 
     # Check environment
     print("\nChecking environment configuration...")
-    required_vars = ['PINECONE_API_KEY', 'LLM_API_KEY']
+    required_vars = ['GOOGLE_CLOUD_PROJECT', 'LLM_API_KEY']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
 
     if missing_vars:
@@ -197,7 +197,7 @@ def run_end_to_end_pipeline():
         rag = RAGIntegrator()
         print(f"[SUCCESS] RAG system initialized")
         print(f"          Index dimension: {rag._index_dimension}")
-        print(f"          Pinecone namespace: '{rag._default_namespace}'")
+        print(f"          Firestore collection: '{rag._default_namespace}'")
     except Exception as e:
         print(f"[ERROR] Failed to initialize RAG system: {e}")
         return False
@@ -209,14 +209,8 @@ def run_end_to_end_pipeline():
 
     print(f"\nSearching for policies relevant to: '{exception_request['exception_type']}'")
     print(f"Data level: {exception_request['data_level']}")
-    print(f"Note: Not using metadata filter since Pinecone uses 'classification_levels' (string)")
-    print(f"      instead of 'classification_level' (int). Semantic search will find relevant policies.")
 
     try:
-        # NOTE: The Pinecone index uses 'classification_levels': 'I, II, III' (string)
-        # not 'classification_level': 3 (int), so we don't use metadata filters.
-        # The semantic search and keywords will find the right policies anyway.
-
         # Build search query that includes data level
         search_query = f"{exception_request['exception_type']} {exception_request['data_level']}"
 
@@ -391,8 +385,6 @@ def run_end_to_end_pipeline():
     print(f"\n[RESULT] Decision Engine Output:")
     print(f"         Recommendation: {decision['recommendation']}")
     print(f"         Approval Status: {decision['approval_status']}")
-    print(f"         Routing: {decision['routing']} Team")
-    print(f"         Approval Required: {', '.join(decision['approval_required'])}")
 
     if decision['max_duration']:
         print(f"         Maximum Duration: {decision['max_duration']} days")
@@ -403,11 +395,6 @@ def run_end_to_end_pipeline():
         print(f"\n         Conditions ({len(decision['conditions'])}):")
         for i, condition in enumerate(decision['conditions'], 1):
             print(f"            {i}. {condition}")
-
-    if decision['reasoning']:
-        print(f"\n         Reasoning:")
-        for reason in decision['reasoning']:
-            print(f"            {reason}")
 
     # ========================================
     # STEP 6: Final Summary
@@ -425,17 +412,30 @@ def run_end_to_end_pipeline():
     print(f"\nPolicy Analysis:")
     print(f"   Policies Found: {len(policy_search_results)}")
     print(f"   Compliance Status: {compliance_status}")
-    print(f"   Required Controls: {len(required_controls)}")
+    if required_controls:
+        print(f"   Required Controls:")
+        for ctrl in required_controls:
+            print(f"      - {ctrl}")
 
     print(f"\nRisk Assessment:")
     print(f"   Risk Score: {risk_score}/100 ({risk_level})")
 
     print(f"\nDecision:")
     print(f"   Recommendation: {decision['recommendation']}")
-    print(f"   Approval Required: {', '.join(decision['approval_required'])}")
-    print(f"   Routing: {decision['routing']} Team")
+    if decision.get('conditions'):
+        print(f"   Conditions:")
+        for cond in decision['conditions']:
+            print(f"      - {cond}")
 
-    print("\n" + "=" * 80)
+    if narrative and narrative != "Risk narrative generation failed.":
+        print(f"\nExecutive Risk Narrative:")
+        for paragraph in narrative.split('\n\n'):
+            if paragraph.strip():
+                for line in paragraph.strip().split('\n'):
+                    print(f"   {line}")
+                print()
+
+    print("=" * 80)
 
     # ========================================
     # Cleanup

@@ -10,9 +10,11 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+import os
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
+from services.llm_service import chat_with_form_data
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,10 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
+
+# Maps the integer data level used by the risk scorer back to the Roman numeral
+# strings stored in Firestore (e.g. classification_levels: ["I","II","III"]).
+DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
     "Monthly": "monthly",
@@ -38,13 +44,6 @@ FIREWALL_MAP = {
     "No Coverage": "no",
 }
 
-# Maps frontend exceptionType → decision engine routing string
-EXCEPTION_TYPE_MAP = {
-    "firewall": "security",
-    "identity": "identity",
-    "vulnerability": "vulnerability",
-    "other": "other",
-}
 
 IMPACT_MAP = {
     "Low": "low",
@@ -96,9 +95,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:4173"],
+    allow_origins=_allowed_origins,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["Content-Type"],
 )
@@ -176,7 +178,8 @@ def build_rag_request(form: ExceptionForm, scorer_data: dict, request_id: str) -
     return {
         "id": request_id,
         "exception_type": (form.exceptionType or "other").lower(),
-        "data_level": scorer_data["data_stored_level"],
+        # Firestore stores classification_levels as Roman numeral strings ("I", "II", "III").
+        "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
 
@@ -222,9 +225,6 @@ def format_reply(
         f"  Patch Management:      {bd['patch_management']}/10",
         f"  Impact Assessment:     {bd['impact_assessment']}/10",
         "",
-        "ROUTING & APPROVAL",
-        f"  Team: {decision['routing']} Team",
-        f"  Approvers Required: {', '.join(decision['approval_required'])}",
         f"  Maximum Duration: {duration}",
     ]
 
@@ -270,13 +270,7 @@ async def chat(form: ExceptionForm, request: Request):
     scorer_data = map_form_to_scorer(form)
     score_result = calculate_risk_score(scorer_data)
 
-    engine_type = EXCEPTION_TYPE_MAP.get(
-        (form.exceptionType or "other").lower(), "other"
-    )
-    decision = make_exception_decision(
-        score_result["total"],
-        {**scorer_data, "exception_type": engine_type},
-    )
+    decision = make_exception_decision(score_result["total"], scorer_data)
 
     # Step 4: RAG (blocking I/O — run in executor)
     compliance = None
@@ -302,4 +296,30 @@ async def chat(form: ExceptionForm, request: Request):
 
     # Step 5: format and return
     reply = format_reply(score_result, decision, compliance, narrative, rag_ok)
+    return {"reply": reply}
+
+
+# ---------------------------------------------------------------------------
+# Chat assistant endpoint
+# ---------------------------------------------------------------------------
+
+class ChatMessageRequest(BaseModel):
+    message: str
+    history: Optional[list] = None
+    formData: Optional[ExceptionForm] = None
+
+
+@app.post("/chat/message")
+async def chat_message(body: ChatMessageRequest):
+    """Conversational assistant endpoint for the chat bubble.
+
+    Accepts a user message and optional conversation history + current form data,
+    and returns a context-aware reply from the Gemini-powered chat assistant.
+    """
+    form_dict = body.formData.model_dump(exclude_none=True) if body.formData else None
+    reply = chat_with_form_data(
+        message=body.message,
+        form_data=form_dict,
+        history=body.history or [],
+    )
     return {"reply": reply}

@@ -1,7 +1,8 @@
+import logging
 import os
-import requests 
+import requests
 import json
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 import time
 import base64
 import mimetypes
@@ -11,8 +12,10 @@ import io
 
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 #Web request information consisting of the URL, API key and header information to call TDX API
-BASE_URL = "https://us.ipaas.teamdynamix.com/tdapp/app/flow/api/v1/start/20/88398cb6-c77f-4f9d-b175-ba633ae09ab5?WaitForResults=true"
+BASE_URL = os.getenv("TDX_API_URL", "")
 TDX_API_KEY = os.getenv("TDX_API_KEY")
 headers = {
             "Content-Type":"application/json",
@@ -21,9 +24,9 @@ headers = {
 
 #Makes the TDX API call and handles the different methods
 def tdx_call(data):
-     response = requests.post(BASE_URL, headers=headers, json=data)
+     response = requests.post(BASE_URL, headers=headers, json=data, timeout=30)
      if response.status_code != 200:
-          print("Error calling TDX API: " + response.status_code, response.text)
+          logger.error("TDX API error: status=%d, body=%s", response.status_code, response.text)
           return None
      return response.json()["data"]
 
@@ -133,7 +136,7 @@ def process_ticket(ticket_id):
         
         ticket_data = tdx_call(request_header)
         if not ticket_data:
-            print("Cannot find ticket based on ID")
+            logger.warning("No ticket data returned for ticket ID: %s", ticket_id)
             return None
         
         #Check for attachments, if not present, produce empty array
@@ -201,7 +204,7 @@ def process_ticket(ticket_id):
             #See the 'filtered_attributes' keys for example of 'Name' values
             name = attr.get("Name")
             value = attr.get("ValueText")
-            if name in filtered_attributes: #Check if should still write key value pair with value of "N/A" or "None" if key isn't present in ticket data
+            if name in filtered_attributes:
                 mapped_key = filtered_attributes[name]
                 filtered_data[mapped_key] = value
 
@@ -210,7 +213,7 @@ def process_ticket(ticket_id):
 
 def main_loop():
     while True:
-        print("Checking for new tickets...")
+        logger.info("Checking for new tickets...")
         cache = load_cache()
 
         open_tickets = get_all_open_tickets()
@@ -219,7 +222,7 @@ def main_loop():
         if not open_tickets:
             time.sleep(300)
             continue
-        
+
         #Create an array of ticket ids for fetched open tickets
         current_ids = [ticket["TicketID"] for ticket in open_tickets]
 
@@ -227,20 +230,19 @@ def main_loop():
         new_ids = [ticket_id for ticket_id in current_ids if ticket_id not in cache["ticket_ids"]]
 
         if new_ids:
-            print("New ticket ID(s):", new_ids)
+            logger.info("New ticket ID(s): %s", new_ids)
             for ticket_id in new_ids:
                 processed = process_ticket(ticket_id)
-            
+
                 if processed:
                     cache["ticket_ids"].append(ticket_id)
                     cache["ticket_data"][ticket_id] = processed
                     save_cache(cache)
-                    print(f"Processed and cached ticket {ticket_id}")
+                    logger.info("Processed and cached ticket %s", ticket_id)
         else:
-            print("No new tickets found")
+            logger.info("No new tickets found")
 
         #Check every hour for new tickets
-        print("Sleeping")
         time.sleep(3600)
         
 

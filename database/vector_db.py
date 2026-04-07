@@ -1,26 +1,40 @@
-from pinecone import Pinecone, ServerlessSpec
+import logging
+from google.cloud import firestore
+from google.cloud.firestore_v1.vector import Vector
 from dotenv import load_dotenv
 import os
-import time
 import json
 import requests
 
 load_dotenv()
 
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+logger = logging.getLogger(__name__)
 
-index_name = "exemption-policy"
+project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+collection_name = os.getenv("FIRESTORE_COLLECTION", "policies")
+
+
+database_id = os.getenv("FIRESTORE_DATABASE", "policies")
+
+
+def get_firestore_client():
+    """Return a Firestore client, using project and database from env if set."""
+    if project_id:
+        return firestore.Client(project=project_id, database=database_id)
+    return firestore.Client(database=database_id)
+
 
 def get_google_embedding(text, api_key):
-    """Generate embedding using Google's text-embedding-004 model (768 dimensions)."""
-    url = "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent"
+    """Generate embedding using Google's gemini-embedding-001 model (768 dimensions)."""
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent"
     headers = {"Content-Type": "application/json"}
     params = {"key": api_key}
 
     data = {
-        "model": "models/text-embedding-004",
+        "model": "models/gemini-embedding-001",
         "content": {"parts": [{"text": text}]},
-        "task_type": "RETRIEVAL_DOCUMENT"  # Use RETRIEVAL_DOCUMENT for indexing
+        "task_type": "RETRIEVAL_DOCUMENT",
+        "outputDimensionality": 768
     }
 
     response = requests.post(url, headers=headers, params=params, json=data, timeout=30)
@@ -30,17 +44,6 @@ def get_google_embedding(text, api_key):
     embedding = result.get("embedding", {}).get("values", [])
     return embedding
 
-def initialize_index():
-    if not pc.has_index(index_name):
-        pc.create_index(
-            name=index_name,
-            dimension=768,  # Google text-embedding-004 dimension
-            metric="cosine",
-            spec=ServerlessSpec(
-                cloud="aws",
-                region="us-east-1"
-            )
-        )
 
 def build_chunk_text(item):
     """Build searchable text from policy document fields."""
@@ -68,100 +71,84 @@ def build_chunk_text(item):
 
     return ' '.join(parts)
 
+
 def upsert_data():
-    # Load policy data from JSON
+    """Load policies from data.json, generate embeddings, and write to Firestore."""
     json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'data.json')
 
     with open(json_path, encoding='utf-8') as f:
         policies = json.load(f)
 
     if not isinstance(policies, list):
-        policies = [policies]  # Handle single object
+        policies = [policies]
 
-    print(f"Loaded {len(policies)} policies from JSON")
+    logger.info("Loaded %d policies from JSON", len(policies))
 
-    # Get Google API key for embeddings
     google_api_key = os.getenv("LLM_API_KEY")
     if not google_api_key:
         raise ValueError("LLM_API_KEY environment variable not set")
 
-    # Generate embeddings and prepare vectors
-    print(f"Generating embeddings using Google text-embedding-004...")
-    vectors_to_upsert = []
+    db = get_firestore_client()
+    col = db.collection(collection_name)
+
+    logger.info("Generating embeddings and writing to Firestore collection '%s'...", collection_name)
+    success_count = 0
 
     for idx, policy in enumerate(policies):
-        # Build searchable text
         text = build_chunk_text(policy)
         if not text:
-            print(f"Warning: Policy {policy.get('_id', idx)} has no text, skipping")
+            logger.warning("Policy %s has no text, skipping", policy.get('_id', idx))
             continue
 
         try:
             embedding = get_google_embedding(text, google_api_key)
             if len(embedding) != 768:
-                print(f"Warning: Embedding dimension mismatch for {policy.get('_id')}, skipping")
+                logger.warning("Embedding dimension mismatch for policy %s, skipping", policy.get('_id'))
                 continue
 
-            # Prepare metadata (no None/null values allowed in Pinecone)
-            # Bug 12 fix: store classification_levels as a list so that Pinecone
-            # $in filters work correctly (e.g. {"classification_levels": {"$in": ["III"]}}).
-            # Previously this was collapsed to a single comma-joined string which
-            # made metadata filtering impossible.
-            classification_levels = policy.get("classification_levels", []) or []
+            doc_id = policy.get("_id", f"policy-{idx}")
+            doc_data = {
+                "embedding": Vector(embedding),
+                "chunk_text": text,
+                "control_id": policy.get("control_id") or "",
+                "risk_area": policy.get("risk_area") or "",
+                "classification_levels": policy.get("classification_levels") or [],
+                "is_exception_related": bool(policy.get("is_exception_related")),
+                "requires_approval": bool(policy.get("requires_approval")),
+                "approver_role": policy.get("approver_role") or "",
+            }
 
-            vectors_to_upsert.append({
-                "id": policy.get("_id", f"policy-{idx}"),
-                "values": embedding,
-                "metadata": {
-                    "chunk_text": text,
-                    "control_id": policy.get("control_id") or "",
-                    "risk_area": policy.get("risk_area") or "",
-                    "classification_levels": classification_levels,  # list, not string
-                    "is_exception_related": bool(policy.get("is_exception_related")),
-                    "requires_approval": bool(policy.get("requires_approval")),
-                    "approver_role": policy.get("approver_role") or ""
-                }
-            })
+            col.document(doc_id).set(doc_data)
+            success_count += 1
 
             if (idx + 1) % 10 == 0:
-                print(f"  Processed {idx + 1}/{len(policies)} policies...")
+                logger.info("Processed %d/%d policies...", idx + 1, len(policies))
 
         except Exception as e:
-            print(f"Error processing policy {policy.get('_id')}: {e}")
+            logger.error("Error processing policy %s: %s", policy.get('_id'), e)
             continue
 
-    dense_index = pc.Index(index_name)
-    print(f"Upserting {len(vectors_to_upsert)} vectors to index '{index_name}'...")
+    logger.info("Successfully wrote %d/%d policies to Firestore", success_count, len(policies))
 
-    # Upsert in batches of 100
-    batch_size = 100
-    for i in range(0, len(vectors_to_upsert), batch_size):
-        batch = vectors_to_upsert[i:i + batch_size]
-        dense_index.upsert(
-            vectors=batch,
-            namespace="policy-and-exemption-criterion"
-        )
-        print(f"Upserted batch {i // batch_size + 1} ({len(batch)} vectors)")
 
-    print(f"\nSuccessfully upserted {len(vectors_to_upsert)} vectors!")
+def delete_collection():
+    """Delete all documents in the policies collection."""
+    db = get_firestore_client()
+    col = db.collection(collection_name)
+    docs = col.stream()
+    deleted = 0
+    for doc in docs:
+        doc.reference.delete()
+        deleted += 1
+    logger.info("Deleted %d documents from collection '%s'", deleted, collection_name)
 
-    # Verify indexing
-    print("Verifying index...")
-    time.sleep(2)  # Brief wait for indexing
-    stats = dense_index.describe_index_stats()
-    print(f"Index stats: {stats}")
-
-def delete_index():
-    if pc.has_index(index_name):
-        pc.delete_index(index_name)
 
 def main():
-    print("Initializing index...")
-    initialize_index()
-    print("Upserting data...")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logger.info("Upserting policy data to Firestore...")
     upsert_data()
-    print("Done!")
-    # delete_index()
+    logger.info("Done!")
+
 
 if __name__ == "__main__":
     main()
