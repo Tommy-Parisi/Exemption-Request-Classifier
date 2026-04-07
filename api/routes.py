@@ -12,14 +12,12 @@ from pydantic import BaseModel, Field
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
-from services.llm_service import chat_with_form_data
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
-# Maps the integer data level used by the risk scorer back to the Roman numeral strings.
 DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
@@ -134,11 +132,35 @@ class ChatRequest(BaseModel):
     universityImpact: Optional[str] = None
     mitigation: Optional[str] = None
     message: Optional[str] = None
+    sessionId: Optional[str] = None
     history: List[ChatMessage] = Field(default_factory=list)
+
+
+class ChatMessageRequest(BaseModel):
+    message: str
+    sessionId: Optional[str] = None
+    history: List[ChatMessage] = Field(default_factory=list)
+    formData: Optional[ChatRequest] = None
 
 
 def _mapped_exception_type(value: Optional[str]) -> str:
     return EXCEPTION_TYPE_MAP.get((value or "other").lower(), "other")
+
+
+async def _chat_with_agent(message: str, form_data: dict, session_id: str) -> str:
+    from services.agent_service import chat_with_form_data as agent_chat_with_form_data
+
+    return await agent_chat_with_form_data(
+        message=message,
+        form_data=form_data,
+        session_id=session_id,
+    )
+
+
+def _form_dict(form: ChatRequest) -> dict:
+    form_data = form.model_dump(exclude_none=True, exclude={"history", "sessionId"})
+    form_data.pop("message", None)
+    return {key: value for key, value in form_data.items() if value and str(value).strip()}
 
 
 def map_form_to_scorer(form: ChatRequest) -> dict:
@@ -261,13 +283,14 @@ def format_reply(
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest, raw_request: Request):
     if request.message:
-        form_data = request.model_dump(exclude_none=True, exclude={"history"})
-        message = form_data.pop("message", "")
-        form_data = {key: value for key, value in form_data.items() if value and str(value).strip()}
-        history = [message_item.model_dump() for message_item in request.history]
+        session_id = request.sessionId or str(uuid.uuid4())
 
         try:
-            reply = chat_with_form_data(message=message, form_data=form_data, history=history)
+            reply = await _chat_with_agent(
+                message=request.message,
+                form_data=_form_dict(request),
+                session_id=session_id,
+            )
             return {"reply": reply}
         except Exception as exc:
             return {"reply": f"Error processing request: {str(exc)}"}
@@ -299,22 +322,17 @@ async def chat_endpoint(request: ChatRequest, raw_request: Request):
     return {"reply": reply}
 
 
-class ChatMessageRequest(BaseModel):
-    message: str
-    history: List[ChatMessage] = Field(default_factory=list)
-    formData: Optional[ChatRequest] = None
-
-
 @app.post("/chat/message")
 async def chat_message_endpoint(body: ChatMessageRequest):
-    form_data = {}
-    if body.formData:
-        form_data = body.formData.model_dump(exclude_none=True, exclude={"history"})
-        form_data.pop("message", None)
-    history = [message_item.model_dump() for message_item in body.history]
+    session_id = body.sessionId or str(uuid.uuid4())
+    form_data = _form_dict(body.formData) if body.formData else {}
 
     try:
-        reply = chat_with_form_data(message=body.message, form_data=form_data, history=history)
+        reply = await _chat_with_agent(
+            message=body.message,
+            form_data=form_data,
+            session_id=session_id,
+        )
         return {"reply": reply}
     except Exception as exc:
         return {"reply": f"Error processing request: {str(exc)}"}

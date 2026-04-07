@@ -36,6 +36,13 @@ type ChatMessage = {
   content: string;
 };
 
+function createChatSessionId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function App() {
   const [formData, setFormData] = useState<FormData>({
     requestor: "",
@@ -64,11 +71,11 @@ function App() {
     mitigation: "",
     attachment: null,
   });
-
   const [response, setResponse] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatting, setIsChatting] = useState(false);
+  const [chatSessionId] = useState(createChatSessionId);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -110,7 +117,7 @@ function App() {
         body: JSON.stringify({
           ...formData,
           message: newUserMessage.content,
-          history: updatedHistory,
+          sessionId: chatSessionId,
         }),
       });
       const data = await res.json();
@@ -577,8 +584,8 @@ function App() {
               <div>
                 <h3 className="text-xl font-semibold text-[var(--ud-blue)]">Security Analyst Assistant</h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  Chat with the LLM-powered analyst. Each reply automatically includes the full conversation history and
-                  your current form inputs for context.
+                  Chat with the LLM-powered analyst. The agent keeps the conversation context and uses your current form
+                  inputs for each reply.
                 </p>
               </div>
 

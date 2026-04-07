@@ -16,8 +16,8 @@ api/routes.py          ← FastAPI application, CORS, lifespan
         ├── engine/decision_engine.py  ← Approval routing (IAM / SecOps / GRC)
         └── engine/rag_integration.py  ← Policy compliance via Firestore + Gemini
                 │
-                ├── database/vector_db.py   ← Firestore upsert utility (run once)
-                └── services/llm_service.py ← Gemini chat assistant (form helper)
+                ├── database/vector_db.py      ← Firestore upsert utility (run once)
+                └── services/agent_service.py  ← Agents SDK chatbot with guarded policy tools
 ```
 
 ### Risk Score Thresholds
@@ -178,7 +178,7 @@ Evaluates a security exception request form submission.
 │   ├── rag_integration.py # RAG pipeline (Firestore retrieval + Gemini generation)
 │   └── risk_scorer.py     # Weighted risk score calculation
 ├── services/
-│   └── llm_service.py     # Gemini-powered chat assistant for form guidance
+│   └── agent_service.py   # OpenAI Agents SDK chatbot with Firestore-backed policy tools
 ├── tests/
 │   └── test_rag_integration_real.py
 ├── data/
