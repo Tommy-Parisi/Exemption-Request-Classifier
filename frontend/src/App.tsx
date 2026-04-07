@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "./styles/tailwind.css";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 type FormData = {
   requestor: string;
   department: string;
@@ -76,7 +78,7 @@ function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -100,7 +102,7 @@ function App() {
     setIsChatting(true);
 
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

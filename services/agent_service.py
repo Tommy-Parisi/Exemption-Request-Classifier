@@ -3,7 +3,7 @@ from openai import AsyncOpenAI
 from agents import Agent, Runner, trace, function_tool, OpenAIChatCompletionsModel, ModelSettings, input_guardrail, GuardrailFunctionOutput
 from openai.types.shared import Reasoning
 from openai.types.responses import ResponseTextDeltaEvent
-from typing import Dict
+from typing import Dict, List, Optional
 from pydantic import BaseModel
 import os
 import asyncio
@@ -14,8 +14,8 @@ load_dotenv(override=True)
 GEMINI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
 
 gemini_api_key = os.getenv("GOOGLE_API_KEY")
-gemini_client = AsyncOpenAI(base_url=GEMINI_BASE_URL, api_key=os.getenv(gemini_api_key))
-gemini_model = OpenAIChatCompletionsModel("model=gemini-3-pro-preview")
+gemini_client = AsyncOpenAI(base_url=GEMINI_BASE_URL, api_key=gemini_api_key)
+gemini_model = OpenAIChatCompletionsModel("gemini-3-pro-preview")
 
 chat_instructions = "You are a professional, senior IT security analyst assistant at the University of Delaware, \
     tasked with assisting a user in filling out an exception request form. You will be provided with the security \
@@ -42,7 +42,7 @@ guardrail_agent = Agent(
 async def guardrail_for_confidentiality(ctx, agent, message):
     result = await Runner.run(guardrail_agent, message, context=ctx.context)
     isConfidential = result.final_output.isConfidential
-    return GuardrailFunctionOutput(output_info={"found_confidential_data": result.confidentialData},tripwire_triggered=isConfidential)
+    return GuardrailFunctionOutput(output_info={"found_confidential_data": result.final_output.confidentialData},tripwire_triggered=isConfidential)
 
 IT_agent = Agent(
     name="IT Security Analyst Assistant",
@@ -51,6 +51,7 @@ IT_agent = Agent(
     model_settings=ModelSettings(reasoning=Reasoning(effort="low")),
     input_guardrail=[guardrail_agent]
 )
+
 
 
 
