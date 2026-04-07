@@ -8,7 +8,7 @@ A FastAPI backend that evaluates security policy exception requests. Given a com
 
 ```
 Frontend (React/Vite)
-        │  POST /chat  (ExceptionForm JSON)
+        │  POST /evaluate (form evaluation) + POST /chat (agent assistant)
         ▼
 api/routes.py          ← FastAPI application, CORS, lifespan
         │

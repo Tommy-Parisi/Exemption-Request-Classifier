@@ -280,23 +280,9 @@ def format_reply(
     return "\n".join(lines)
 
 
-@app.post("/chat")
-async def chat_endpoint(request: ChatRequest, raw_request: Request):
-    if request.message:
-        session_id = request.sessionId or str(uuid.uuid4())
-
-        try:
-            reply = await _chat_with_agent(
-                message=request.message,
-                form_data=_form_dict(request),
-                session_id=session_id,
-            )
-            return {"reply": reply}
-        except Exception as exc:
-            return {"reply": f"Error processing request: {str(exc)}"}
-
-    rag: Optional[RAGIntegrator] = raw_request.app.state.rag
-    scorer_data = map_form_to_scorer(request)
+async def _evaluate_exception_request(form: ChatRequest, request: Request) -> dict:
+    rag: Optional[RAGIntegrator] = request.app.state.rag
+    scorer_data = map_form_to_scorer(form)
     score_result = calculate_risk_score(scorer_data)
     decision = make_exception_decision(score_result["total"], scorer_data)
 
@@ -307,7 +293,7 @@ async def chat_endpoint(request: ChatRequest, raw_request: Request):
     if rag is not None:
         try:
             request_id = str(uuid.uuid4())
-            rag_request = build_rag_request(request, scorer_data, request_id)
+            rag_request = build_rag_request(form, scorer_data, request_id)
             compliance = rag.policy_compliance_checker(rag_request, top_k=6)
             narrative = rag.generate_risk_narrative(
                 risk_score=score_result["total"],
@@ -322,6 +308,28 @@ async def chat_endpoint(request: ChatRequest, raw_request: Request):
     return {"reply": reply}
 
 
+@app.post("/evaluate")
+async def evaluate_exception(form: ChatRequest, request: Request):
+    return await _evaluate_exception_request(form, request)
+
+
+@app.post("/chat")
+async def chat_endpoint(body: ChatRequest, request: Request):
+    if not body.message:
+        return await _evaluate_exception_request(body, request)
+
+    session_id = body.sessionId or str(uuid.uuid4())
+    try:
+        reply = await _chat_with_agent(
+            message=body.message,
+            form_data=_form_dict(body),
+            session_id=session_id,
+        )
+        return {"reply": reply, "sessionId": session_id}
+    except Exception as exc:
+        return {"reply": f"Error processing request: {str(exc)}", "sessionId": session_id}
+
+
 @app.post("/chat/message")
 async def chat_message_endpoint(body: ChatMessageRequest):
     session_id = body.sessionId or str(uuid.uuid4())
@@ -333,9 +341,9 @@ async def chat_message_endpoint(body: ChatMessageRequest):
             form_data=form_data,
             session_id=session_id,
         )
-        return {"reply": reply}
+        return {"reply": reply, "sessionId": session_id}
     except Exception as exc:
-        return {"reply": f"Error processing request: {str(exc)}"}
+        return {"reply": f"Error processing request: {str(exc)}", "sessionId": session_id}
 
 
 @app.get("/health")

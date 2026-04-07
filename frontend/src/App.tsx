@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./styles/tailwind.css";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const CHAT_SESSION_STORAGE_KEY = "security-exception-chat-session-id";
 
 type FormData = {
   requestor: string;
@@ -43,6 +44,11 @@ function createChatSessionId() {
   return `chat-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function getInitialChatSessionId() {
+  const existingSessionId = window.localStorage.getItem(CHAT_SESSION_STORAGE_KEY);
+  return existingSessionId || createChatSessionId();
+}
+
 function App() {
   const [formData, setFormData] = useState<FormData>({
     requestor: "",
@@ -75,7 +81,11 @@ function App() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isChatting, setIsChatting] = useState(false);
-  const [chatSessionId] = useState(createChatSessionId);
+  const [chatSessionId, setChatSessionId] = useState(getInitialChatSessionId);
+
+  useEffect(() => {
+    window.localStorage.setItem(CHAT_SESSION_STORAGE_KEY, chatSessionId);
+  }, [chatSessionId]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -87,7 +97,7 @@ function App() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
+      const res = await fetch(`${API_BASE}/evaluate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -121,6 +131,9 @@ function App() {
         }),
       });
       const data = await res.json();
+      if (data.sessionId) {
+        setChatSessionId(data.sessionId);
+      }
       const assistantReply: ChatMessage = {
         role: "assistant",
         content: data.reply || "No response from backend",
