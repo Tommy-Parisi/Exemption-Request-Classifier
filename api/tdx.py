@@ -14,6 +14,7 @@ import io
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s   %(levelname)s: %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 #Web request information consisting of the URL, API key and header information to call TDX API
 BASE_URL = os.getenv("TDX_API_URL", "")
 TDX_API_KEY = os.getenv("TDX_API_KEY")
@@ -174,6 +175,7 @@ def process_ticket(ticket_id):
             "Type of Exception" : "exceptionType",
             "If OTHER please specify": "exceptionSpecified",
             "Exception Start Date" : "startDate",
+            "Exception End Date": "endDate",
             "Hostnames" : "hostnames",
             "Unit Head" : "unitHead",
             "Risk Assessment Justification" : "riskAssessment",
@@ -233,7 +235,6 @@ def main_loop():
             logger.info("New ticket ID(s): %s", new_ids)
             for ticket_id in new_ids:
                 processed = process_ticket(ticket_id)
-
                 if processed:
                     cache["ticket_ids"].append(ticket_id)
                     cache["ticket_data"][ticket_id] = processed

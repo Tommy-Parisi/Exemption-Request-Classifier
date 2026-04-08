@@ -154,8 +154,8 @@ def run_end_to_end_pipeline():
     print_step(0, "Exception Request Submission")
 
     exception_request = {
-        "id": "EXC-2025-001",
-        "exception_type": "cloud database hosting",
+        "id": "725820",
+        "exception_type": "Vulnerability",
         "data_level": "Level III",
         "security_controls": [
             "encryption at rest",
@@ -163,12 +163,12 @@ def run_end_to_end_pipeline():
             "VPN access",
             "network isolation"
         ],
-        "description": "Migration of employee payroll database to AWS RDS with enhanced security controls",
-        "business_justification": "Critical cost reduction and improved scalability for HR operations. Legacy on-premises database reaching end-of-life.",
+        "description": "Metal1 is not upgradable from its current state (Sun machine running Solaris 10).&nbsp; It has become one of our top priorities to examine everything running on the server and either migrate it to a new platform or stop using it.",
+        "business_justification": "This system is essential to running the campus network and other infrastructure.",
         "duration": "permanent",
-        "affected_systems": ["payroll-db", "hr-portal", "benefits-system"],
-        "requestor": "Jane Smith, VP of Human Resources",
-        "department": "Human Resources"
+        "affected_systems": ["DNS", "DHCP", "LDAP", "Network", "IAM"],
+        "requestor": "Melvin Rau",
+        "department": "Infrastructure & Architecture"
     }
 
     print("\nException Request Details:")
