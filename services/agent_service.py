@@ -34,7 +34,7 @@ load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 
 DEFAULT_GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-DEFAULT_MAIN_MODEL = "gpt-4.1"
+DEFAULT_MAIN_MODEL = "gpt-4.1-mini"
 DEFAULT_REVIEW_MODEL = "gpt-4.1-mini"
 DEFAULT_GOOGLE_MODEL = "gemini-2.5-flash"
 
