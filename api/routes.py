@@ -78,6 +78,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.state.rag = None
 
 raw_origins = os.getenv(
     "ALLOWED_ORIGINS",
