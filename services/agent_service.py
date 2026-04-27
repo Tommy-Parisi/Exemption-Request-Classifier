@@ -21,6 +21,7 @@ from agents import (
     input_guardrail,
 )
 from agents.exceptions import InputGuardrailTripwireTriggered
+from agents.memory.session import SessionABC
 from agents.models.openai_provider import OpenAIProvider
 from dotenv import load_dotenv
 from openai.types.shared import Reasoning
@@ -34,9 +35,7 @@ load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 
 DEFAULT_GOOGLE_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-DEFAULT_MAIN_MODEL = "gpt-4.1-mini"
-DEFAULT_REVIEW_MODEL = "gpt-4.1-mini"
-DEFAULT_GOOGLE_MODEL = "gemini-2.5-flash"
+DEFAULT_GEMINI_MODEL = "gemini-3-flash-preview"
 
 CURRENT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = CURRENT_DIR.parent
@@ -72,6 +71,21 @@ FIELD_LABELS = {
     "universityImpact": "How important is this asset to the University as a whole",
     "mitigation": "Additional mitigation tools or techniques",
 }
+
+READABILITY_FIELD_LABELS = [
+    "Reason",
+    "Exception Type",
+    "Impacted Systems",
+    "Data Level",
+    "Justification",
+    "Mitigation",
+    "Business Justification",
+    "Operational Requirement",
+    "Administrator Assignment",
+    "Patch Frequency",
+    "Firewall Rules",
+    "Hostnames",
+]
 
 STOP_WORDS = {
     "a",
@@ -171,6 +185,124 @@ def _extract_input_text(agent_input: str | list[Any]) -> str:
     return "\n".join(parts)
 
 
+def _normalize_plain_text(text: str) -> str:
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return ""
+
+    cleaned = re.sub(r"```[a-zA-Z0-9_-]*\n?", "", cleaned)
+    cleaned = cleaned.replace("```", "")
+    cleaned = re.sub(r"`([^`]*)`", r"\1", cleaned)
+    cleaned = re.sub(r"\*\*([^*]+)\*\*", r"\1", cleaned)
+    cleaned = re.sub(r"\*([^*]+)\*", r"\1", cleaned)
+    cleaned = re.sub(r"^#{1,6}\s*", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"^\s*[-*+]\s+", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"^\s*\d+\.\s+", "", cleaned, flags=re.MULTILINE)
+    cleaned = cleaned.replace("\r\n", "\n")
+
+    for label in READABILITY_FIELD_LABELS:
+        cleaned = re.sub(
+            rf"\s*{re.escape(label)}:\s*",
+            f"\n\n{label}: ",
+            cleaned,
+        )
+
+    normalized_lines: list[str] = []
+    previous_blank = False
+    for raw_line in cleaned.split("\n"):
+        line = raw_line.strip()
+        if not line:
+            if not previous_blank and normalized_lines:
+                normalized_lines.append("")
+            previous_blank = True
+            continue
+        normalized_lines.append(line)
+        previous_blank = False
+
+    cleaned = "\n".join(normalized_lines).strip()
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return re.sub(r"(?<!\n)\n\n", "\n\n", cleaned).strip()
+
+
+def _extract_session_message_text(item: dict[str, Any]) -> str:
+    content = item.get("content")
+    if isinstance(content, str):
+        return _normalize_plain_text(content)
+
+    if isinstance(content, list):
+        parts: list[str] = []
+        for entry in content:
+            if not isinstance(entry, dict):
+                continue
+            text = entry.get("text")
+            if isinstance(text, str) and text.strip():
+                parts.append(text)
+        return _normalize_plain_text("\n\n".join(parts))
+
+    output = item.get("output")
+    if isinstance(output, str):
+        return _normalize_plain_text(output)
+
+    return ""
+
+
+def _sanitize_session_item(item: Any) -> Optional[dict[str, str]]:
+    if not isinstance(item, dict):
+        return None
+
+    role = item.get("role")
+    if role == "user":
+        text = _extract_session_message_text(item)
+        return {"role": "user", "content": text} if text else None
+
+    if role == "assistant":
+        text = _extract_session_message_text(item)
+        return {"role": "assistant", "content": text} if text else None
+
+    if item.get("type") == "message":
+        text = _extract_session_message_text(item)
+        return {"role": "assistant", "content": text} if text else None
+
+    return None
+
+
+class GeminiSafeSession(SessionABC):
+    def __init__(self, session_id: str, db_path: Path) -> None:
+        self.session_id = session_id
+        self._inner = SQLiteSession(session_id=session_id, db_path=db_path)
+        self.session_settings = self._inner.session_settings
+
+    async def get_items(self, limit: int | None = None) -> list[dict[str, str]]:
+        items = await self._inner.get_items(limit=limit)
+        sanitized: list[dict[str, str]] = []
+        for item in items:
+            normalized = _sanitize_session_item(item)
+            if normalized:
+                sanitized.append(normalized)
+        return sanitized
+
+    async def add_items(self, items: list[Any]) -> None:
+        sanitized: list[dict[str, str]] = []
+        for item in items:
+            normalized = _sanitize_session_item(item)
+            if normalized:
+                sanitized.append(normalized)
+        if sanitized:
+            await self._inner.add_items(sanitized)
+
+    async def pop_item(self) -> dict[str, str] | None:
+        while True:
+            item = await self._inner.pop_item()
+            if item is None:
+                return None
+            normalized = _sanitize_session_item(item)
+            if normalized:
+                return normalized
+
+    async def clear_session(self) -> None:
+        await self._inner.clear_session()
+
+
 class ConfidentialityCheck(BaseModel):
     is_confidential: bool
     confidential_data: list[str] = Field(default_factory=list)
@@ -187,8 +319,17 @@ class PolicyDatabase:
     def __init__(self) -> None:
         self.records = self._load_local_records()
         self.rag: Optional[RAGIntegrator] = None
+        self.primary_backend = "local_json"
         try:
-            self.rag = RAGIntegrator()
+            rag = RAGIntegrator()
+            if rag.is_ready:
+                self.rag = rag
+                self.primary_backend = "firestore"
+                logger.info("Policy database configured to use Firestore RAG.")
+            else:
+                logger.warning(
+                    "Firestore RAG was not ready during startup; using local JSON fallback."
+                )
         except Exception as exc:
             logger.warning(
                 "Unable to initialize Firestore RAG policy database; using local fallback: %s",
@@ -220,11 +361,20 @@ class PolicyDatabase:
             try:
                 results = self._search_firestore(cleaned_query, top_k)
                 if results:
+                    logger.info(
+                        "Policy search served from Firestore RAG with %d matches.",
+                        len(results),
+                    )
                     return results
             except Exception as exc:
                 logger.warning("Firestore RAG search failed, falling back to local search: %s", exc)
 
-        return self._search_local(cleaned_query, top_k)
+        results = self._search_local(cleaned_query, top_k)
+        if results:
+            logger.info("Policy search served from local JSON fallback with %d matches.", len(results))
+        else:
+            logger.info("Policy search returned no matches from Firestore or local JSON fallback.")
+        return results
 
     def _search_firestore(self, query: str, top_k: int) -> list[dict[str, Any]]:
         if self.rag is None:
@@ -365,14 +515,25 @@ class AgentContext:
 def _assistant_instructions(ctx: RunContextWrapper[AgentContext], agent: Agent[AgentContext]) -> str:
     del agent
     return (
-        "You are a professional senior IT security analyst at the University of Delaware. "
+        "You are an AI assistant supporting University of Delaware security exception workflows. "
+        "You are not a human Senior IT Security Analyst, but you should respond with the care, rigor, and practical judgment of a strong senior IT security analyst assistant. "
         "Help the user complete, review, and improve a security exception request. "
+        "If it helps with transparency, you may briefly describe yourself as an AI assistant rather than a person or employee. "
         "The Agents SDK session already contains the conversation history, so use that memory instead of asking the user to repeat prior context. "
+        "Keep answers very concise, practical, and easy to skim. Most answers should be 1-3 short sentences, or at most 4 short sentences when needed. "
+        "Use plain text only. Do not use markdown, bullet lists, numbered lists, headings, bold text, code fences, or tables. "
+        "Make the plain-text output easy to read by using short paragraphs, line breaks, and simple field-label formats like 'Reason: ...' or 'Mitigation: ...'. "
+        "Use a readability pattern of one short intro paragraph, then a blank line, then one short field entry per paragraph with a blank line between entries. "
+        "If you mention multiple fields, put each field on its own line and leave a blank line between each field entry. "
+        "Do not pack multiple field suggestions into one paragraph. Each suggested field entry should read like its own short block. "
         "Rely on the current form data and policy database tools for specifics. "
-        "Use `search_policy_database` whenever you need policy requirements, approvals, controls, or exemption guidance. "
+        "Use `search_policy_database` whenever you need policy requirements, approvals, controls, or exemption guidance, but use it as background support rather than something to quote line by line. "
         "Before you send any final answer, always call `review_exception_response` on your planned draft and revise if it finds issues. "
-        "Do not invent policy details. Cite relevant control IDs in plain text when policy data is available. "
-        "If important fields are missing, say which ones matter most and why.\n\n"
+        "Do not invent policy details. Do not cite policy IDs, control IDs, page numbers, or policy excerpts unless the user explicitly asks for them. "
+        "Your main job is to help the user fill out the form on the page. Tell the user which specific fields matter, what to type into those fields, and how to phrase the content clearly and safely. "
+        "When the user asks a broad question, translate it into the most relevant form fields such as reason, exception type, impacted systems, data level, mitigation, patch frequency, firewall rules, or business justification. "
+        "When possible, give a short recommended entry the user can adapt and paste into the field. "
+        "If important fields are missing, name the specific fields and explain what the user should enter in each one.\n\n"
         "Current form data:\n"
         f"{format_form_data(ctx.context.form_data)}\n\n"
         "Security form summary:\n"
@@ -398,8 +559,14 @@ def _reviewer_instructions(ctx: RunContextWrapper[AgentContext], agent: Agent[Ag
     del agent
     return (
         "You are the quality reviewer for a University of Delaware security exception assistant. "
-        "Review the proposed answer for accuracy, policy grounding, completeness, and safety. "
+        "Review the proposed answer for accuracy, policy grounding, usefulness for filling out the form, completeness, brevity, plain-text formatting, and safety. "
         "Reject answers that invent policy, skip obvious missing fields, or fail to answer the user's request. "
+        "Reject answers that use markdown, bullets, numbered lists, headings, tables, bold text, or code fences unless the user explicitly asked for that formatting. "
+        "Reject answers that focus on citing policies instead of helping the user complete the actual fields on the page. "
+        "Prefer answers that tell the user what to enter into specific fields and give short suggested wording. "
+        "Prefer a clear pattern of one short intro paragraph, a blank line, then one field entry per paragraph with blank lines between entries. "
+        "Prefer readable plain text with short paragraphs, blank lines between sections, and one field-label line per paragraph instead of dense blocks of text. "
+        "Prefer compact answers that stay within 1-3 short sentences when possible. "
         "If the answer is acceptable, approve it briefly. If not, give concrete feedback and list missing points.\n\n"
         "Current form data:\n"
         f"{format_form_data(ctx.context.form_data)}"
@@ -437,7 +604,7 @@ async def review_exception_response(
         review_prompt,
         context=ctx.context,
         run_config=service.run_config,
-        max_turns=3,
+        max_turns=2,
     )
     review = result.final_output_as(ReviewDecision, raise_if_incorrect_type=True)
     status = "APPROVED" if review.approved else "REVISE"
@@ -462,7 +629,7 @@ async def confidentiality_guardrail(
         input_text,
         context=ctx.context,
         run_config=service.run_config,
-        max_turns=2,
+        max_turns=1,
     )
     review = result.final_output_as(ConfidentialityCheck, raise_if_incorrect_type=True)
     return GuardrailFunctionOutput(
@@ -490,6 +657,10 @@ class AgentService:
             return
 
         self.main_model, self.review_model, self.model_provider = self._build_model_provider()
+        fast_reasoning_settings = ModelSettings(
+            temperature=0.1,
+            reasoning=Reasoning(effort="low"),
+        )
         self.run_config = RunConfig(
             model_provider=self.model_provider,
             session_settings=SessionSettings(limit=40),
@@ -498,14 +669,14 @@ class AgentService:
             name="Confidentiality Guardrail",
             instructions=_guardrail_instructions,
             model=self.review_model,
-            model_settings=ModelSettings(temperature=0),
+            model_settings=fast_reasoning_settings,
             output_type=ConfidentialityCheck,
         )
         self.reviewer_agent = Agent[AgentContext](
             name="Security Exception Reviewer",
             instructions=_reviewer_instructions,
             model=self.review_model,
-            model_settings=ModelSettings(temperature=0),
+            model_settings=fast_reasoning_settings,
             output_type=ReviewDecision,
         )
         self.assistant_agent = Agent[AgentContext](
@@ -514,26 +685,18 @@ class AgentService:
             model=self.main_model,
             tools=[search_policy_database, review_exception_response],
             input_guardrails=[confidentiality_guardrail],
-            model_settings=ModelSettings(reasoning=Reasoning(effort="low"), temperature=0.2),
+            model_settings=fast_reasoning_settings,
         )
 
     def _build_model_provider(self) -> tuple[str, str, OpenAIProvider]:
-        openai_key = os.getenv("OPENAI_API_KEY")
-        openai_base_url = os.getenv("OPENAI_BASE_URL")
         google_key = os.getenv("GOOGLE_API_KEY")
 
-        if openai_key:
-            return (
-                os.getenv("AGENT_MAIN_MODEL", DEFAULT_MAIN_MODEL),
-                os.getenv("AGENT_REVIEW_MODEL", DEFAULT_REVIEW_MODEL),
-                OpenAIProvider(api_key=openai_key, base_url=openai_base_url or None),
-            )
-
         if google_key:
-            google_model = os.getenv("GEMINI_CHAT_MODEL", DEFAULT_GOOGLE_MODEL)
+            google_model = os.getenv("GEMINI_CHAT_MODEL", DEFAULT_GEMINI_MODEL)
+            review_model = os.getenv("GEMINI_REVIEW_MODEL", google_model)
             return (
                 os.getenv("AGENT_MAIN_MODEL", google_model),
-                os.getenv("AGENT_REVIEW_MODEL", google_model),
+                os.getenv("AGENT_REVIEW_MODEL", review_model),
                 OpenAIProvider(
                     api_key=google_key,
                     base_url=os.getenv("GOOGLE_OPENAI_BASE_URL", DEFAULT_GOOGLE_BASE_URL),
@@ -541,13 +704,11 @@ class AgentService:
                 ),
             )
 
-        raise ValueError(
-            "No LLM credentials found. Set OPENAI_API_KEY or GOOGLE_API_KEY."
-        )
+        raise ValueError("No Gemini credentials found. Set GOOGLE_API_KEY.")
 
-    def _get_session(self, session_id: str) -> SQLiteSession:
+    def _get_session(self, session_id: str) -> GeminiSafeSession:
         SESSION_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-        return SQLiteSession(session_id=session_id, db_path=SESSION_DB_PATH)
+        return GeminiSafeSession(session_id=session_id, db_path=SESSION_DB_PATH)
 
     async def chat_with_form_data(
         self,
@@ -573,17 +734,19 @@ class AgentService:
                 context=context,
                 session=session,
                 run_config=self.run_config,
-                max_turns=8,
+                max_turns=4,
             )
-            return str(result.final_output).strip()
+            return _normalize_plain_text(str(result.final_output))
         except InputGuardrailTripwireTriggered as exc:
             output_info = exc.guardrail_result.output.output_info or {}
-            safe_response = str(output_info.get("safe_response") or "").strip()
+            safe_response = _normalize_plain_text(str(output_info.get("safe_response") or ""))
             if safe_response:
                 return safe_response
-            return (
+            return _normalize_plain_text(
+                (
                 "I found potentially sensitive information in your request. "
                 "Please redact secrets or regulated data and resend a sanitized version."
+                )
             )
 
     async def chat(self, *, message: str, session_id: str) -> str:

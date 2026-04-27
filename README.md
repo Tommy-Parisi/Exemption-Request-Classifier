@@ -107,11 +107,11 @@ All configuration is driven by environment variables. See `.env.example` for a c
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GOOGLE_API_KEY` | Yes | — | Google API key for the chat assistant |
-| `LLM_API_KEY` | Yes | — | Google API key for RAG embeddings and LLM calls |
-| `LLM_API_URL` | No | Gemini 2.0 Flash endpoint | Override LLM endpoint |
-| `GEMINI_CHAT_MODEL` | No | `gemini-2.5-flash` | Model used for chat responses |
-| `GEMINI_EVAL_MODEL` | No | same as `GEMINI_CHAT_MODEL` | Model used for response evaluation |
+| `GOOGLE_API_KEY` | Yes | — | Google Gemini API key for the chat assistant and default RAG calls |
+| `LLM_API_KEY` | No | falls back to `GOOGLE_API_KEY` | Optional separate Google Gemini API key for RAG embeddings and LLM calls |
+| `LLM_API_URL` | No | Gemini 3 Flash Preview endpoint | Override LLM endpoint |
+| `GEMINI_CHAT_MODEL` | No | `gemini-3-flash-preview` | Model used for chat responses |
+| `GEMINI_REVIEW_MODEL` | No | same as `GEMINI_CHAT_MODEL` | Model used for response evaluation |
 | `GOOGLE_CLOUD_PROJECT` | Yes | — | GCP project ID hosting the Firestore database |
 | `FIRESTORE_COLLECTION` | No | `policies` | Firestore collection name for policy documents |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Yes | — | Path to GCP service account JSON key file |

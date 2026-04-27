@@ -67,11 +67,11 @@ class RAGIntegrator:
         self._collection_name = firestore_collection or os.getenv(
             "FIRESTORE_COLLECTION", "policies"
         )
-        self.llm_api_key = llm_api_key or os.getenv("LLM_API_KEY")
+        self.llm_api_key = llm_api_key or os.getenv("LLM_API_KEY") or os.getenv("GOOGLE_API_KEY")
         self.llm_api_url = (
             llm_api_url
             or os.getenv("LLM_API_URL")
-            or "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+            or "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
         )
         self.llm_temperature = llm_temperature
         self.max_retries = max_retries
@@ -114,6 +114,10 @@ class RAGIntegrator:
 
         self._default_namespace = self._collection_name
         logger.info("RAGIntegrator initialized (collection=%s)", self._collection_name)
+
+    @property
+    def is_ready(self) -> bool:
+        return self._firestore_collection is not None
 
     def _get_embedding_cache(self) -> Dict[str, Any]:
         if "embeddings" not in self._shelf:
@@ -200,7 +204,7 @@ class RAGIntegrator:
     def _generate_fallback_embedding(self, text: str) -> List[float]:  # noqa: ARG002
         raise RuntimeError(
             "Embedding generation failed and no safe fallback is available. "
-            "Verify that LLM_API_KEY is set and that the Google embedding "
+            "Verify that LLM_API_KEY or GOOGLE_API_KEY is set and that the Google embedding "
             "endpoint is reachable before retrying."
         )
 
@@ -283,7 +287,7 @@ class RAGIntegrator:
 
     def _call_llm_json(self, prompt: str) -> Dict[str, Any]:
         if not self.llm_api_key:
-            raise RuntimeError("LLM_API_KEY is required for LLM calls")
+            raise RuntimeError("LLM_API_KEY or GOOGLE_API_KEY is required for Gemini LLM calls")
 
         headers = {"Content-Type": "application/json"}
         params = {"key": self.llm_api_key}

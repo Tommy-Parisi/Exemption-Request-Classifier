@@ -2,12 +2,12 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
-from typing import List, Literal, Optional
+from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
@@ -36,13 +36,6 @@ FIREWALL_MAP = {
     "No Coverage": "no",
 }
 
-EXCEPTION_TYPE_MAP = {
-    "firewall": "security",
-    "identity": "identity",
-    "vulnerability": "vulnerability",
-    "other": "other",
-}
-
 IMPACT_MAP = {
     "Low": "low",
     "Moderate": "moderate",
@@ -67,12 +60,12 @@ RISK_LEVEL_MAP = [
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Initializing RAGIntegrator...")
+    logger.info("Initialising RAGIntegrator...")
     try:
         app.state.rag = RAGIntegrator()
         logger.info("RAGIntegrator ready")
     except Exception as exc:
-        logger.error("RAGIntegrator failed to initialize: %s", exc)
+        logger.error("RAGIntegrator failed to initialise: %s", exc)
         app.state.rag = None
     yield
     if app.state.rag is not None:
@@ -86,27 +79,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.state.rag = None
 
-raw_origins = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:5173,http://localhost:4173,http://localhost:3000",
-)
-allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+_raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 
-class ChatMessage(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str
-
-
-class ChatRequest(BaseModel):
+class ExceptionForm(BaseModel):
     requestor: Optional[str] = None
     department: Optional[str] = None
     exceptionType: Optional[str] = None
@@ -131,39 +115,16 @@ class ChatRequest(BaseModel):
     userImpact: Optional[str] = None
     universityImpact: Optional[str] = None
     mitigation: Optional[str] = None
-    message: Optional[str] = None
-    sessionId: Optional[str] = None
-    history: List[ChatMessage] = Field(default_factory=list)
 
 
 class ChatMessageRequest(BaseModel):
     message: str
     sessionId: Optional[str] = None
-    history: List[ChatMessage] = Field(default_factory=list)
-    formData: Optional[ChatRequest] = None
+    history: Optional[list] = None
+    formData: Optional[ExceptionForm] = None
 
 
-def _mapped_exception_type(value: Optional[str]) -> str:
-    return EXCEPTION_TYPE_MAP.get((value or "other").lower(), "other")
-
-
-async def _chat_with_agent(message: str, form_data: dict, session_id: str) -> str:
-    from services.agent_service import chat_with_form_data as agent_chat_with_form_data
-
-    return await agent_chat_with_form_data(
-        message=message,
-        form_data=form_data,
-        session_id=session_id,
-    )
-
-
-def _form_dict(form: ChatRequest) -> dict:
-    form_data = form.model_dump(exclude_none=True, exclude={"history", "sessionId"})
-    form_data.pop("message", None)
-    return {key: value for key, value in form_data.items() if value and str(value).strip()}
-
-
-def map_form_to_scorer(form: ChatRequest) -> dict:
+def map_form_to_scorer(form: ExceptionForm) -> dict:
     return {
         "data_stored_level": DATA_LEVEL_MAP.get(form.dataLevelStored or "", 2),
         "data_access_level": DATA_LEVEL_MAP.get(form.dataAccessLevel or "", 2),
@@ -179,11 +140,10 @@ def map_form_to_scorer(form: ChatRequest) -> dict:
         "server_dependencies": IMPACT_MAP.get(form.dependencyLevel or "", "low"),
         "user_dependencies": IMPACT_MAP.get(form.userImpact or "", "low"),
         "university_importance": UNIVERSITY_MAP.get(form.universityImpact or "", "low"),
-        "exception_type": _mapped_exception_type(form.exceptionType),
     }
 
 
-def build_rag_request(form: ChatRequest, scorer_data: dict, request_id: str) -> dict:
+def build_rag_request(form: ExceptionForm, scorer_data: dict, request_id: str) -> dict:
     controls = []
     if scorer_data["allow_vulnerability_scanning"]:
         controls.append("vulnerability scanning")
@@ -200,13 +160,13 @@ def build_rag_request(form: ChatRequest, scorer_data: dict, request_id: str) -> 
 
     return {
         "id": request_id,
-        "exception_type": scorer_data["exception_type"],
+        "exception_type": (form.exceptionType or "other").lower(),
         "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
 
 
-def risk_level(score: int) -> str:
+def _risk_level(score: int) -> str:
     for threshold, label in RISK_LEVEL_MAP:
         if score > threshold:
             return label
@@ -221,8 +181,9 @@ def format_reply(
     rag_ok: bool,
 ) -> str:
     total = score_result["total"]
-    breakdown = score_result["breakdown"]
-    level = risk_level(total)
+    bd = score_result["breakdown"]
+    level = _risk_level(total)
+
     duration = (
         f"{decision['max_duration']} days" if decision.get("max_duration") else "Not approved"
     )
@@ -236,22 +197,19 @@ def format_reply(
         f"  Recommendation: {decision['recommendation']}",
         "",
         "SCORE BREAKDOWN",
-        f"  Data Classification:   {breakdown['data_classification']}/30",
-        f"  Security Controls Gap: {breakdown['security_controls_gap']}/35",
-        f"  Network Exposure:      {breakdown['network_exposure']}/15",
-        f"  Patch Management:      {breakdown['patch_management']}/10",
-        f"  Impact Assessment:     {breakdown['impact_assessment']}/10",
+        f"  Data Classification:   {bd['data_classification']}/30",
+        f"  Security Controls Gap: {bd['security_controls_gap']}/35",
+        f"  Network Exposure:      {bd['network_exposure']}/15",
+        f"  Patch Management:      {bd['patch_management']}/10",
+        f"  Impact Assessment:     {bd['impact_assessment']}/10",
         "",
-        "ROUTING & APPROVAL",
-        f"  Team: {decision.get('routing') or 'N/A'}",
-        f"  Approvers Required: {', '.join(decision.get('approval_required', [])) or 'N/A'}",
         f"  Maximum Duration: {duration}",
     ]
 
     if decision.get("conditions"):
         lines += ["", "CONDITIONS"]
-        for index, condition in enumerate(decision["conditions"], start=1):
-            lines.append(f"  {index}. {condition}")
+        for i, cond in enumerate(decision["conditions"], 1):
+            lines.append(f"  {i}. {cond}")
 
     lines += ["", "POLICY COMPLIANCE"]
     if not rag_ok or compliance is None:
@@ -262,17 +220,15 @@ def format_reply(
             lines.append(f"  Referenced Policies: {', '.join(compliance['policy_refs'])}")
         if compliance.get("violations"):
             lines.append("  Violations:")
-            for violation in compliance["violations"]:
-                if isinstance(violation, dict):
-                    lines.append(
-                        f"    - {violation.get('policy', '')}: {violation.get('reason', '')}"
-                    )
+            for v in compliance["violations"]:
+                if isinstance(v, dict):
+                    lines.append(f"    - {v.get('policy', '')}: {v.get('reason', '')}")
                 else:
-                    lines.append(f"    - {violation}")
+                    lines.append(f"    - {v}")
         if compliance.get("required_controls"):
             lines.append("  Required Controls:")
-            for control in compliance["required_controls"]:
-                lines.append(f"    - {control}")
+            for ctrl in compliance["required_controls"]:
+                lines.append(f"    - {ctrl}")
 
     if narrative:
         lines += ["", "EXECUTIVE RISK NARRATIVE", f"  {narrative}"]
@@ -280,8 +236,20 @@ def format_reply(
     return "\n".join(lines)
 
 
-async def _evaluate_exception_request(form: ChatRequest, request: Request) -> dict:
+async def _chat_with_agent(message: str, form_data: Optional[dict], session_id: str) -> str:
+    from services.agent_service import chat_with_form_data as agent_chat_with_form_data
+
+    return await agent_chat_with_form_data(
+        message=message,
+        form_data=form_data,
+        session_id=session_id,
+    )
+
+
+@app.post("/chat")
+async def chat(form: ExceptionForm, request: Request):
     rag: Optional[RAGIntegrator] = request.app.state.rag
+
     scorer_data = map_form_to_scorer(form)
     score_result = calculate_risk_score(scorer_data)
     decision = make_exception_decision(score_result["total"], scorer_data)
@@ -308,37 +276,14 @@ async def _evaluate_exception_request(form: ChatRequest, request: Request) -> di
     return {"reply": reply}
 
 
-@app.post("/evaluate")
-async def evaluate_exception(form: ChatRequest, request: Request):
-    return await _evaluate_exception_request(form, request)
-
-
-@app.post("/chat")
-async def chat_endpoint(body: ChatRequest, request: Request):
-    if not body.message:
-        return await _evaluate_exception_request(body, request)
-
-    session_id = body.sessionId or str(uuid.uuid4())
-    try:
-        reply = await _chat_with_agent(
-            message=body.message,
-            form_data=_form_dict(body),
-            session_id=session_id,
-        )
-        return {"reply": reply, "sessionId": session_id}
-    except Exception as exc:
-        return {"reply": f"Error processing request: {str(exc)}", "sessionId": session_id}
-
-
 @app.post("/chat/message")
-async def chat_message_endpoint(body: ChatMessageRequest):
+async def chat_message(body: ChatMessageRequest):
+    form_dict = body.formData.model_dump(exclude_none=True) if body.formData else None
     session_id = body.sessionId or str(uuid.uuid4())
-    form_data = _form_dict(body.formData) if body.formData else {}
-
     try:
         reply = await _chat_with_agent(
             message=body.message,
-            form_data=form_data,
+            form_data=form_dict,
             session_id=session_id,
         )
         return {"reply": reply, "sessionId": session_id}

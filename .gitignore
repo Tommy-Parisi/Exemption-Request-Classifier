@@ -2,10 +2,15 @@ __pycache__
 *.pyc
 .env
 .rag_cache
+.rag_cache-shm
+.rag_cache-wal
 myenv/
 myvenv/
 venv/
 .DS_Store
+data/agent_sessions.sqlite3
+data/agent_sessions.sqlite3-shm
+data/agent_sessions.sqlite3-wal
 
 # GCP service account credentials
 capstone-489617-d5624dae18d3.json
