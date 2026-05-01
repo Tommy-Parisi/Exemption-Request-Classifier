@@ -9,8 +9,9 @@ Development:
 Production:
     ENV=production uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 """
-import os
 import logging
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,7 +21,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
 
-from api.routes import app  # noqa: E402 — import after env/logging setup
+from api.routes import app  # noqa: E402
 
 if __name__ == "__main__":
     import uvicorn

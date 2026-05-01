@@ -1,4 +1,5 @@
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -8,24 +9,15 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-load_dotenv()
-
-import os
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
-from services.llm_service import chat_with_form_data
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Field mapping constants
-# ---------------------------------------------------------------------------
-
 DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
-
-# Maps the integer data level used by the risk scorer back to the Roman numeral
-# strings stored in Firestore (e.g. classification_levels: ["I","II","III"]).
 DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
 
 PATCH_FREQ_MAP = {
@@ -43,7 +35,6 @@ FIREWALL_MAP = {
     "Minimal Coverage": "minimal",
     "No Coverage": "no",
 }
-
 
 IMPACT_MAP = {
     "Low": "low",
@@ -67,10 +58,6 @@ RISK_LEVEL_MAP = [
 ]
 
 
-# ---------------------------------------------------------------------------
-# FastAPI lifespan — initialise RAGIntegrator once at startup
-# ---------------------------------------------------------------------------
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initialising RAGIntegrator...")
@@ -89,11 +76,8 @@ async def lifespan(app: FastAPI):
             logger.warning("RAGIntegrator close error: %s", exc)
 
 
-# ---------------------------------------------------------------------------
-# App + CORS
-# ---------------------------------------------------------------------------
-
 app = FastAPI(lifespan=lifespan)
+app.state.rag = None
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:4173")
 _allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
@@ -105,10 +89,6 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-
-# ---------------------------------------------------------------------------
-# Request model
-# ---------------------------------------------------------------------------
 
 class ExceptionForm(BaseModel):
     requestor: Optional[str] = None
@@ -137,9 +117,12 @@ class ExceptionForm(BaseModel):
     mitigation: Optional[str] = None
 
 
-# ---------------------------------------------------------------------------
-# Field mapping helpers
-# ---------------------------------------------------------------------------
+class ChatMessageRequest(BaseModel):
+    message: str
+    sessionId: Optional[str] = None
+    history: Optional[list] = None
+    formData: Optional[ExceptionForm] = None
+
 
 def map_form_to_scorer(form: ExceptionForm) -> dict:
     return {
@@ -178,7 +161,6 @@ def build_rag_request(form: ExceptionForm, scorer_data: dict, request_id: str) -
     return {
         "id": request_id,
         "exception_type": (form.exceptionType or "other").lower(),
-        # Firestore stores classification_levels as Roman numeral strings ("I", "II", "III").
         "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
         "security_controls": controls,
     }
@@ -190,10 +172,6 @@ def _risk_level(score: int) -> str:
             return label
     return "LOW"
 
-
-# ---------------------------------------------------------------------------
-# Response formatter
-# ---------------------------------------------------------------------------
 
 def format_reply(
     score_result: dict,
@@ -258,21 +236,24 @@ def format_reply(
     return "\n".join(lines)
 
 
-# ---------------------------------------------------------------------------
-# Endpoint
-# ---------------------------------------------------------------------------
+async def _chat_with_agent(message: str, form_data: Optional[dict], session_id: str) -> str:
+    from services.agent_service import chat_with_form_data as agent_chat_with_form_data
+
+    return await agent_chat_with_form_data(
+        message=message,
+        form_data=form_data,
+        session_id=session_id,
+    )
+
 
 @app.post("/chat")
 async def chat(form: ExceptionForm, request: Request):
     rag: Optional[RAGIntegrator] = request.app.state.rag
 
-    # Steps 1–3: pure Python, synchronous
     scorer_data = map_form_to_scorer(form)
     score_result = calculate_risk_score(scorer_data)
-
     decision = make_exception_decision(score_result["total"], scorer_data)
 
-    # Step 4: RAG (blocking I/O — run in executor)
     compliance = None
     narrative = None
     rag_ok = False
@@ -281,45 +262,35 @@ async def chat(form: ExceptionForm, request: Request):
         try:
             request_id = str(uuid.uuid4())
             rag_request = build_rag_request(form, scorer_data, request_id)
-
             compliance = rag.policy_compliance_checker(rag_request, top_k=6)
-
             narrative = rag.generate_risk_narrative(
                 risk_score=score_result["total"],
                 factors=score_result["breakdown"],
                 policy_refs=compliance.get("policy_refs", []),
             )
-
             rag_ok = True
         except Exception as exc:
             logger.error("RAG pipeline error: %s", exc)
 
-    # Step 5: format and return
     reply = format_reply(score_result, decision, compliance, narrative, rag_ok)
     return {"reply": reply}
 
 
-# ---------------------------------------------------------------------------
-# Chat assistant endpoint
-# ---------------------------------------------------------------------------
-
-class ChatMessageRequest(BaseModel):
-    message: str
-    history: Optional[list] = None
-    formData: Optional[ExceptionForm] = None
-
-
 @app.post("/chat/message")
 async def chat_message(body: ChatMessageRequest):
-    """Conversational assistant endpoint for the chat bubble.
-
-    Accepts a user message and optional conversation history + current form data,
-    and returns a context-aware reply from the Gemini-powered chat assistant.
-    """
     form_dict = body.formData.model_dump(exclude_none=True) if body.formData else None
-    reply = chat_with_form_data(
-        message=body.message,
-        form_data=form_dict,
-        history=body.history or [],
-    )
-    return {"reply": reply}
+    session_id = body.sessionId or str(uuid.uuid4())
+    try:
+        reply = await _chat_with_agent(
+            message=body.message,
+            form_data=form_dict,
+            session_id=session_id,
+        )
+        return {"reply": reply, "sessionId": session_id}
+    except Exception as exc:
+        return {"reply": f"Error processing request: {str(exc)}", "sessionId": session_id}
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}

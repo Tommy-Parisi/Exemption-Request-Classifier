@@ -8,7 +8,7 @@ A FastAPI backend that evaluates security policy exception requests. Given a com
 
 ```
 Frontend (React/Vite)
-        │  POST /chat  (ExceptionForm JSON)
+        │  POST /evaluate (form evaluation) + POST /chat (agent assistant)
         ▼
 api/routes.py          ← FastAPI application, CORS, lifespan
         │
@@ -16,8 +16,8 @@ api/routes.py          ← FastAPI application, CORS, lifespan
         ├── engine/decision_engine.py  ← Approval routing (IAM / SecOps / GRC)
         └── engine/rag_integration.py  ← Policy compliance via Firestore + Gemini
                 │
-                ├── database/vector_db.py   ← Firestore upsert utility (run once)
-                └── services/llm_service.py ← Gemini chat assistant (form helper)
+                ├── database/vector_db.py      ← Firestore upsert utility (run once)
+                └── services/agent_service.py  ← Agents SDK chatbot with guarded policy tools
 ```
 
 ### Risk Score Thresholds
@@ -107,11 +107,11 @@ All configuration is driven by environment variables. See `.env.example` for a c
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GOOGLE_API_KEY` | Yes | — | Google API key for the chat assistant |
-| `LLM_API_KEY` | Yes | — | Google API key for RAG embeddings and LLM calls |
-| `LLM_API_URL` | No | Gemini 2.0 Flash endpoint | Override LLM endpoint |
-| `GEMINI_CHAT_MODEL` | No | `gemini-2.5-flash` | Model used for chat responses |
-| `GEMINI_EVAL_MODEL` | No | same as `GEMINI_CHAT_MODEL` | Model used for response evaluation |
+| `GOOGLE_API_KEY` | Yes | — | Google Gemini API key for the chat assistant and default RAG calls |
+| `LLM_API_KEY` | No | falls back to `GOOGLE_API_KEY` | Optional separate Google Gemini API key for RAG embeddings and LLM calls |
+| `LLM_API_URL` | No | Gemini 3 Flash Preview endpoint | Override LLM endpoint |
+| `GEMINI_CHAT_MODEL` | No | `gemini-3-flash-preview` | Model used for chat responses |
+| `GEMINI_REVIEW_MODEL` | No | same as `GEMINI_CHAT_MODEL` | Model used for response evaluation |
 | `GOOGLE_CLOUD_PROJECT` | Yes | — | GCP project ID hosting the Firestore database |
 | `FIRESTORE_COLLECTION` | No | `policies` | Firestore collection name for policy documents |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Yes | — | Path to GCP service account JSON key file |
@@ -178,7 +178,7 @@ Evaluates a security exception request form submission.
 │   ├── rag_integration.py # RAG pipeline (Firestore retrieval + Gemini generation)
 │   └── risk_scorer.py     # Weighted risk score calculation
 ├── services/
-│   └── llm_service.py     # Gemini-powered chat assistant for form guidance
+│   └── agent_service.py   # OpenAI Agents SDK chatbot with Firestore-backed policy tools
 ├── tests/
 │   └── test_rag_integration_real.py
 ├── data/

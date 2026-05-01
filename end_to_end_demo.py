@@ -187,7 +187,7 @@ def run_end_to_end_pipeline():
 
     if missing_vars:
         print(f"[WARNING] Missing environment variables: {', '.join(missing_vars)}")
-        print("          The demo will use fallback/mock data for missing services.")
+        print("          Firestore/LLM-dependent steps may be skipped, but local risk scoring will continue.")
     else:
         print("[SUCCESS] Environment configured successfully")
 
@@ -249,7 +249,7 @@ def run_end_to_end_pipeline():
 
     try:
         compliance_result = rag.policy_compliance_checker(
-            exception_request=exception_request,
+            request_data=exception_request,
             top_k=5
         )
 
