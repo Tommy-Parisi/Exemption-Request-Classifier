@@ -14,6 +14,7 @@ import io
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(format='%(asctime)s   %(levelname)s: %(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 #Web request information consisting of the URL, API key and header information to call TDX API
 BASE_URL = os.getenv("TDX_API_URL", "")
 TDX_API_KEY = os.getenv("TDX_API_KEY")
@@ -30,33 +31,12 @@ def tdx_call(data):
           return None
      return response.json()["data"]
 
-#Cache file path and name
-cache_file = "api/ticket_cache.json"
-
-#If the json file doesn't exist, create the file with ticket_ids and ticket_data fields, else return the file data
-def load_cache():
-    if not os.path.exists(cache_file):
-        default_cache = {"ticket_ids":[], "ticket_data":{}}
-        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-        with open(cache_file, "w") as f:
-            json.dump(default_cache, f, indent=4)
-        return default_cache
-    
-    with open(cache_file, "r") as f:
-        return json.load(f)
-
-#Writes current cache to the ticket_cache.json file
-def save_cache(cache):
-    with open(cache_file, "w") as f:
-        json.dump(cache, f, indent=4)
-
 #Gets all tickets using the TDX API
 def get_all_open_tickets():
     data = {"Method": "Get_Tickets", "Only_Open":"true"}
     return tdx_call(data)
 
-
-
+#Takes attachment encoded data, formats it
 def interpret_attachment(ticket_id, attachment_name, base64_data):
     decoded_bytes = base64.b64decode(base64_data)
 
@@ -90,14 +70,14 @@ def interpret_attachment(ticket_id, attachment_name, base64_data):
             text = decoded_bytes.decode("utf-8", errors="ignore")
             summary["extracted_text_preview"] = text[:2000]
 
-        
+
         #WordDocs
         elif mime_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             from docx import Document
             doc = Document(io.BytesIO(decoded_bytes))
             text = "\n".join([para.text for para in doc.paragraphs])
             summary["extracted_text_preview"] = text[:2000]
-        
+
         #Excel
         elif mime_type in ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"]:
             df = pd.read_excel(io.BytesIO(decoded_bytes), nrows=1000)
@@ -106,7 +86,7 @@ def interpret_attachment(ticket_id, attachment_name, base64_data):
                 "columns": list(df.columns),
                 "sample_rows": df.head(3).to_dict(orient="records")
             })
-        
+
         #PDF
         elif mime_type == "application/pdf":
             from pypdf import PdfReader
@@ -117,28 +97,27 @@ def interpret_attachment(ticket_id, attachment_name, base64_data):
                 if page_text:
                     text+= page_text + '\n'
             summary["extracted_text_preview"] = text[:2000]
-        
+
         #Image
         elif mime_type and mime_type.startswith("image/"):
             summary["note"] = "Image saved."
-        
+
         else:
             summary["note"] = "File saved, no analysis or extraction performed."
     except Exception as e:
         summary["error"] = str(e)
-    
+
     return summary
 
-
-#Grabs relevant information fields from the requested ticket and returns the filtered data. 
+#Grabs relevant information fields from the requested ticket and returns the filtered data.
 def process_ticket(ticket_id):
         request_header = {"Method": "Get_Ticket", "TicketID": str(ticket_id)}
-        
+
         ticket_data = tdx_call(request_header)
         if not ticket_data:
             logger.warning("No ticket data returned for ticket ID: %s", ticket_id)
             return None
-        
+
         #Check for attachments, if not present, produce empty array
         ticket_attachments = ticket_data.get("Attachments", [])
         attachments_data = []
@@ -162,7 +141,7 @@ def process_ticket(ticket_id):
         else:
             attachments_data = "None"
 
-        #Grab relevant data from the 'data' field of the ticket data and format it for json output    
+        #Grab relevant data from the 'data' field of the ticket data and format it for json output
         filtered_data = {
             "requestor": ticket_data.get("RequestorName"),
             "department": ticket_data.get("AccountName"),
@@ -174,6 +153,7 @@ def process_ticket(ticket_id):
             "Type of Exception" : "exceptionType",
             "If OTHER please specify": "exceptionSpecified",
             "Exception Start Date" : "startDate",
+            "Exception End Date": "endDate",
             "Hostnames" : "hostnames",
             "Unit Head" : "unitHead",
             "Risk Assessment Justification" : "riskAssessment",
@@ -196,7 +176,7 @@ def process_ticket(ticket_id):
             "Impacted Systems, Services and Data" : "impactedSystems",
             "Summary of Compensating Information Security Controls" : "mitigation"
             }
-        
+
         #Grab relevant data from the 'attributes' field of the 'data' field
         attributes = ticket_data.get("Attributes")
         for attr in attributes:
@@ -209,6 +189,27 @@ def process_ticket(ticket_id):
                 filtered_data[mapped_key] = value
 
         return filtered_data
+
+
+#Cache file path and name
+cache_file = "api/ticket_cache.json"
+
+#If the json file doesn't exist, create the file with ticket_ids and ticket_data fields, else return the file data
+def load_cache():
+    if not os.path.exists(cache_file):
+        default_cache = {"ticket_ids":[], "ticket_data":{}}
+        os.makedirs(os.path.dirname(cache_file), exist_ok=True)
+        with open(cache_file, "w") as f:
+            json.dump(default_cache, f, indent=4)
+        return default_cache
+
+    with open(cache_file, "r") as f:
+        return json.load(f)
+
+#Writes current cache to the ticket_cache.json file
+def save_cache(cache):
+    with open(cache_file, "w") as f:
+        json.dump(cache, f, indent=4)
 
 
 def main_loop():
@@ -233,7 +234,6 @@ def main_loop():
             logger.info("New ticket ID(s): %s", new_ids)
             for ticket_id in new_ids:
                 processed = process_ticket(ticket_id)
-
                 if processed:
                     cache["ticket_ids"].append(ticket_id)
                     cache["ticket_data"][ticket_id] = processed
@@ -244,7 +244,7 @@ def main_loop():
 
         #Check every hour for new tickets
         time.sleep(3600)
-        
+
 
 if __name__ == "__main__":
     main_loop()
