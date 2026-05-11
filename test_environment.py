@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Connectivity check for the Exemption Request Classifier.
+Connectivity check for the Exception Request Classifier.
 Run this after setup to verify all services are reachable before starting the server.
 """
 
@@ -109,7 +109,7 @@ def test_embedding_api():
 
 
 if __name__ == "__main__":
-    print("Exemption Request Classifier — Environment Check")
+    print("Exception Request Classifier — Environment Check")
     print("=" * 50)
     print()
 

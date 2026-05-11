@@ -9,6 +9,18 @@ import mimetypes
 from pathlib import Path
 import pandas as pd
 import io
+from datetime import datetime
+
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from engine.risk_scorer import calculate_risk_score
+from engine.decision_engine import make_exception_decision
+from engine.rag_integration import RAGIntegrator
+from config import (
+    DATA_LEVEL_MAP, DATA_LEVEL_ROMAN, PATCH_FREQ_MAP,
+    FIREWALL_MAP, IMPACT_MAP, UNIVERSITY_MAP, RISK_LEVEL_MAP,
+)
 
 
 load_dotenv()
@@ -139,7 +151,7 @@ def process_ticket(ticket_id):
                 attachments_data.append(summary)
 
         else:
-            attachments_data = "None"
+            attachments_data = []
 
         #Grab relevant data from the 'data' field of the ticket data and format it for json output
         filtered_data = {
@@ -211,8 +223,166 @@ def save_cache(cache):
     with open(cache_file, "w") as f:
         json.dump(cache, f, indent=4)
 
+REPORTS_DIR = Path("reports")
+
+
+def _risk_level(score):
+    for threshold, label in RISK_LEVEL_MAP:
+        if score > threshold:
+            return label
+    return "LOW"
+
+
+def map_ticket_to_scorer(ticket):
+    return {
+        "data_stored_level": DATA_LEVEL_MAP.get(ticket.get("dataLevelStored") or "", 2),
+        "data_access_level": DATA_LEVEL_MAP.get(ticket.get("dataAccessLevel") or "", 2),
+        "allow_vulnerability_scanning": (ticket.get("vulnScanner") or "").strip().lower() == "yes",
+        "allow_edr_crowdstrike": (ticket.get("edrAllowed") or "").strip().lower() == "yes",
+        "local_firewall": FIREWALL_MAP.get(ticket.get("localFirewall") or "", "minimal"),
+        "network_firewall": FIREWALL_MAP.get(ticket.get("networkFirewall") or "", "minimal"),
+        "os_up_to_date": (ticket.get("osUpToDate") or "").strip().lower() == "yes",
+        "has_public_ip": (ticket.get("publicIP") or "").strip().lower() == "yes",
+        "management_network_access": (ticket.get("managementAccess") or "").strip().lower() == "yes",
+        "os_patch_frequency": PATCH_FREQ_MAP.get(ticket.get("osPatchFrequency") or "", "quarterly"),
+        "app_patch_frequency": PATCH_FREQ_MAP.get(ticket.get("appPatchFrequency") or "", "quarterly"),
+        "server_dependencies": IMPACT_MAP.get(ticket.get("dependencyLevel") or "", "low"),
+        "user_dependencies": IMPACT_MAP.get(ticket.get("userImpact") or "", "low"),
+        "university_importance": UNIVERSITY_MAP.get(ticket.get("universityImpact") or "", "low"),
+    }
+
+
+def evaluate_ticket(ticket_id, ticket, rag):
+    scorer_data = map_ticket_to_scorer(ticket)
+    score_result = calculate_risk_score(scorer_data)
+    decision = make_exception_decision(score_result["total"], scorer_data)
+
+    compliance = None
+    narrative = None
+
+    if rag is not None:
+        try:
+            import uuid
+            controls = []
+            if scorer_data["allow_vulnerability_scanning"]:
+                controls.append("vulnerability scanning")
+            if scorer_data["allow_edr_crowdstrike"]:
+                controls.append("edr crowdstrike endpoint detection")
+            if scorer_data["local_firewall"] == "adequate":
+                controls.append("local firewall")
+            if scorer_data["network_firewall"] == "adequate":
+                controls.append("network firewall")
+            if scorer_data["os_up_to_date"]:
+                controls.append("os up to date")
+            if ticket.get("mitigation"):
+                controls.append(ticket["mitigation"][:200])
+
+            rag_request = {
+                "id": str(uuid.uuid4()),
+                "exception_type": (ticket.get("exceptionType") or "other").lower(),
+                "data_level": DATA_LEVEL_ROMAN.get(scorer_data["data_stored_level"], "II"),
+                "security_controls": controls,
+            }
+            compliance = rag.policy_compliance_checker(rag_request, top_k=6)
+            narrative = rag.generate_risk_narrative(
+                risk_score=score_result["total"],
+                factors=score_result["breakdown"],
+                policy_refs=compliance.get("policy_refs", []),
+            )
+        except Exception as exc:
+            logger.error("RAG pipeline error for ticket %s: %s", ticket_id, exc)
+
+    write_report(ticket_id, ticket, score_result, decision, compliance, narrative)
+
+
+def write_report(ticket_id, ticket, score_result, decision, compliance, narrative):
+    REPORTS_DIR.mkdir(exist_ok=True)
+
+    total = score_result["total"]
+    bd = score_result["breakdown"]
+    level = _risk_level(total)
+    duration = f"{decision['max_duration']} days" if decision.get("max_duration") else "Not approved"
+    generated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    lines = [
+        "SECURITY EXCEPTION REQUEST EVALUATION",
+        "======================================",
+        f"Ticket ID:  {ticket_id}",
+        f"Generated:  {generated}",
+        "",
+        "REQUESTOR INFORMATION",
+        f"  Requestor:  {ticket.get('requestor', 'N/A')}",
+        f"  Department: {ticket.get('department', 'N/A')}",
+        f"  Unit Head:  {ticket.get('unitHead', 'N/A')}",
+        f"  Exception Type: {ticket.get('exceptionType', 'N/A')}",
+        f"  Start Date: {ticket.get('startDate', 'N/A')}",
+        f"  Hostnames:  {ticket.get('hostnames', 'N/A')}",
+        "",
+        "RISK ASSESSMENT",
+        f"  Score: {total}/100  |  Level: {level}",
+        f"  Recommendation: {decision['recommendation']}",
+        "",
+        "SCORE BREAKDOWN",
+        f"  Data Classification:   {bd['data_classification']}/30",
+        f"  Security Controls Gap: {bd['security_controls_gap']}/35",
+        f"  Network Exposure:      {bd['network_exposure']}/15",
+        f"  Patch Management:      {bd['patch_management']}/10",
+        f"  Impact Assessment:     {bd['impact_assessment']}/10",
+        "",
+        f"  Maximum Duration: {duration}",
+    ]
+
+    if decision.get("conditions"):
+        lines += ["", "CONDITIONS"]
+        for i, cond in enumerate(decision["conditions"], 1):
+            lines.append(f"  {i}. {cond}")
+
+    lines += ["", "POLICY COMPLIANCE"]
+    if compliance is None:
+        lines.append("  Policy analysis unavailable (RAG service error).")
+    else:
+        lines.append(f"  Status: {compliance['compliance_status']}")
+        if compliance.get("policy_refs"):
+            lines.append(f"  Referenced Policies: {', '.join(compliance['policy_refs'])}")
+        if compliance.get("violations"):
+            lines.append("  Violations:")
+            for v in compliance["violations"]:
+                if isinstance(v, dict):
+                    lines.append(f"    - {v.get('policy', '')}: {v.get('reason', '')}")
+                else:
+                    lines.append(f"    - {v}")
+        if compliance.get("required_controls"):
+            lines.append("  Required Controls:")
+            for ctrl in compliance["required_controls"]:
+                lines.append(f"    - {ctrl}")
+
+    if narrative:
+        lines += ["", "EXECUTIVE RISK NARRATIVE", f"  {narrative}"]
+
+    if ticket.get("reason"):
+        lines += ["", "REQUESTOR'S REASON", f"  {ticket['reason']}"]
+
+    if ticket.get("riskAssessment"):
+        lines += ["", "RISK ASSESSMENT JUSTIFICATION", f"  {ticket['riskAssessment']}"]
+
+    if ticket.get("mitigation"):
+        lines += ["", "STATED MITIGATIONS", f"  {ticket['mitigation']}"]
+
+    lines += ["", "======================================"]
+
+    report_path = REPORTS_DIR / f"ticket_{ticket_id}.txt"
+    report_path.write_text("\n".join(lines))
+    logger.info("Report written to %s", report_path)
+
 
 def main_loop():
+    try:
+        rag = RAGIntegrator()
+        logger.info("RAGIntegrator initialized")
+    except Exception as exc:
+        logger.error("RAGIntegrator failed to initialize, reports will skip policy analysis: %s", exc)
+        rag = None
+
     while True:
         logger.info("Checking for new tickets...")
         cache = load_cache()
@@ -239,6 +409,7 @@ def main_loop():
                     cache["ticket_data"][ticket_id] = processed
                     save_cache(cache)
                     logger.info("Processed and cached ticket %s", ticket_id)
+                    evaluate_ticket(ticket_id, processed, rag)
         else:
             logger.info("No new tickets found")
 

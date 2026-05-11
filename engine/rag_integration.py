@@ -367,7 +367,13 @@ class RAGIntegrator:
         )
         result = self._call_llm_json(prompt)
         if isinstance(result, dict):
-            return str(result.get("narrative") or result.get("summary") or json.dumps(result))
+            text = (
+                result.get("narrative")
+                or result.get("summary")
+                or result.get("executive_risk_narrative")
+                or next(iter(result.values()), None)
+            )
+            return str(text) if text else json.dumps(result)
         return str(result)
 
     def close(self) -> None:

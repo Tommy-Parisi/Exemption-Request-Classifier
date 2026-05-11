@@ -30,4 +30,8 @@ if __name__ == "__main__":
     port = int(os.getenv("SERVER_PORT", "8000"))
     reload = os.getenv("ENV", "production").lower() == "development"
 
-    uvicorn.run(app, host=host, port=port, reload=reload)
+    if reload:
+        # Uvicorn requires an import string to enable reload mode.
+        uvicorn.run("main:app", host=host, port=port, reload=True)
+    else:
+        uvicorn.run(app, host=host, port=port, reload=False)
