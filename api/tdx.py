@@ -174,14 +174,14 @@ def process_ticket(ticket_id):
             "Level of data the device has access to" : "dataAccessLevel",
             "Level of data the device has access to: Specify": "dataAccessLevelSpecified",
             "Allow Vulnerability Scanning Agent on Client?" : "vulnScanner",
-            "Allow EDR (Crowdstrike on Client)" : "edrAllowed",
+            "Allow EDR (Crowdstrike on Client)?" : "edrAllowed",
             "Local Firewall Rules" : "localFirewall",
             "Network Firewall Rules" : "networkFirewall",
             "Does system have access to management network?" : "managementAccess",
             "Does this machine have a public IP address?" : "publicIP",
             "Is the operating system up to date with the latest patch?" : "osUpToDate",
-            "How often are OS patches installed" : "osPatchFrequency",
-            "How often are application patches installed" : "appPatchFrequency",
+            "How often are OS patches installed?" : "osPatchFrequency",
+            "How often are application patches installed?" : "appPatchFrequency",
             "How many assets or servers depend on this asset?" : "dependencyLevel",
             "How many users are impacted by the services this asset supports?" : "userImpact",
             "How important is this asset to the University as a whole?" : "universityImpact",
@@ -230,13 +230,25 @@ def _risk_level(score):
     for threshold, label in RISK_LEVEL_MAP:
         if score > threshold:
             return label
-    return "LOW"
+    return RISK_LEVEL_MAP[-1][1]
+
+
+def _parse_data_level(text):
+    """TDX sends full descriptions like 'Level I - Low impact: ...'; extract the numeric level."""
+    text = (text or "").strip()
+    if text.startswith("Level III"):
+        return 3
+    if text.startswith("Level II"):
+        return 2
+    if text.startswith("Level I"):
+        return 1
+    return DATA_LEVEL_MAP.get(text, 2)
 
 
 def map_ticket_to_scorer(ticket):
     return {
-        "data_stored_level": DATA_LEVEL_MAP.get(ticket.get("dataLevelStored") or "", 2),
-        "data_access_level": DATA_LEVEL_MAP.get(ticket.get("dataAccessLevel") or "", 2),
+        "data_stored_level": _parse_data_level(ticket.get("dataLevelStored")),
+        "data_access_level": _parse_data_level(ticket.get("dataAccessLevel")),
         "allow_vulnerability_scanning": (ticket.get("vulnScanner") or "").strip().lower() == "yes",
         "allow_edr_crowdstrike": (ticket.get("edrAllowed") or "").strip().lower() == "yes",
         "local_firewall": FIREWALL_MAP.get(ticket.get("localFirewall") or "", "minimal"),
@@ -318,16 +330,16 @@ def write_report(ticket_id, ticket, score_result, decision, compliance, narrativ
         f"  Start Date: {ticket.get('startDate', 'N/A')}",
         f"  Hostnames:  {ticket.get('hostnames', 'N/A')}",
         "",
-        "RISK ASSESSMENT",
-        f"  Score: {total}/100  |  Level: {level}",
+        "SECURITY ASSESSMENT",
+        f"  Score: {total}  |  Risk Level: {level}",
         f"  Recommendation: {decision['recommendation']}",
         "",
         "SCORE BREAKDOWN",
-        f"  Data Classification:   {bd['data_classification']}/30",
-        f"  Security Controls Gap: {bd['security_controls_gap']}/35",
-        f"  Network Exposure:      {bd['network_exposure']}/15",
-        f"  Patch Management:      {bd['patch_management']}/10",
-        f"  Impact Assessment:     {bd['impact_assessment']}/10",
+        f"  Data Classification: {bd['data_classification']}/20",
+        f"  Security Controls:   {bd['security_controls']}/40",
+        f"  Network Posture:     {bd['network_posture']}/10",
+        f"  Patch Management:    {bd['patch_management']}/20",
+        f"  Impact Assessment:   {bd['impact_assessment']}/24",
         "",
         f"  Maximum Duration: {duration}",
     ]
