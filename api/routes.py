@@ -138,7 +138,7 @@ def _risk_level(score: int) -> str:
     for threshold, label in RISK_LEVEL_MAP:
         if score > threshold:
             return label
-    return "LOW"
+    return RISK_LEVEL_MAP[-1][1]
 
 
 def format_reply(
@@ -160,16 +160,16 @@ def format_reply(
         "SECURITY EXCEPTION REQUEST EVALUATION",
         "======================================",
         "",
-        "RISK ASSESSMENT",
-        f"  Score: {total}/100  |  Level: {level}",
+        "SECURITY ASSESSMENT",
+        f"  Score: {total}  |  Risk Level: {level}",
         f"  Recommendation: {decision['recommendation']}",
         "",
         "SCORE BREAKDOWN",
-        f"  Data Classification:   {bd['data_classification']}/30",
-        f"  Security Controls Gap: {bd['security_controls_gap']}/35",
-        f"  Network Exposure:      {bd['network_exposure']}/15",
-        f"  Patch Management:      {bd['patch_management']}/10",
-        f"  Impact Assessment:     {bd['impact_assessment']}/10",
+        f"  Data Classification: {bd['data_classification']}/20",
+        f"  Security Controls:   {bd['security_controls']}/40",
+        f"  Network Posture:     {bd['network_posture']}/10",
+        f"  Patch Management:    {bd['patch_management']}/20",
+        f"  Impact Assessment:   {bd['impact_assessment']}/24",
         "",
         f"  Maximum Duration: {duration}",
     ]
