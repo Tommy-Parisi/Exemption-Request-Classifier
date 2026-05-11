@@ -12,50 +12,14 @@ from pydantic import BaseModel
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
+from config import (
+    DATA_LEVEL_MAP, DATA_LEVEL_ROMAN, PATCH_FREQ_MAP,
+    FIREWALL_MAP, IMPACT_MAP, UNIVERSITY_MAP, RISK_LEVEL_MAP,
+)
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-
-DATA_LEVEL_MAP = {"Level I": 1, "Level II": 2, "Level III": 3}
-DATA_LEVEL_ROMAN = {1: "I", 2: "II", 3: "III"}
-
-PATCH_FREQ_MAP = {
-    "Monthly": "monthly",
-    "Quarterly": "quarterly",
-    "Every 3-6 months": "every 3-6 months",
-    "Every 6-12 months": "every 6-12 months",
-    "Yearly": "yearly+",
-    "Unavailable": "patches unavailable",
-}
-
-FIREWALL_MAP = {
-    "High Coverage": "adequate",
-    "Moderate Coverage": "adequate",
-    "Minimal Coverage": "minimal",
-    "No Coverage": "no",
-}
-
-IMPACT_MAP = {
-    "Low": "low",
-    "Moderate": "moderate",
-    "Extensive": "excessive",
-    "Widespread": "excessive",
-}
-
-UNIVERSITY_MAP = {
-    "Non-Critical": "low",
-    "Critical": "moderate",
-    "Mission Critical": "excessive",
-}
-
-RISK_LEVEL_MAP = [
-    (90, "CRITICAL"),
-    (70, "HIGH"),
-    (40, "MEDIUM"),
-    (16, "LOW-MEDIUM"),
-    (0, "LOW"),
-]
 
 
 @asynccontextmanager

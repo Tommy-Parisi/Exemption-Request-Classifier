@@ -50,6 +50,51 @@ SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8000"))
 ENV: str = os.getenv("ENV", "production")
 
 # ---------------------------------------------------------------------------
+# Form field → scorer mapping tables
+# Shared by api/routes.py and api/tdx.py so both use identical translations.
+# ---------------------------------------------------------------------------
+
+DATA_LEVEL_MAP: dict[str, int] = {"Level I": 1, "Level II": 2, "Level III": 3}
+DATA_LEVEL_ROMAN: dict[int, str] = {1: "I", 2: "II", 3: "III"}
+
+PATCH_FREQ_MAP: dict[str, str] = {
+    "Monthly": "monthly",
+    "Quarterly": "quarterly",
+    "Every 3-6 months": "every 3-6 months",
+    "Every 6-12 months": "every 6-12 months",
+    "Yearly": "yearly+",
+    "Unavailable": "patches unavailable",
+}
+
+FIREWALL_MAP: dict[str, str] = {
+    "High Coverage": "adequate",
+    "Moderate Coverage": "adequate",
+    "Minimal Coverage": "minimal",
+    "No Coverage": "no",
+}
+
+IMPACT_MAP: dict[str, str] = {
+    "Low": "low",
+    "Moderate": "moderate",
+    "Extensive": "excessive",
+    "Widespread": "excessive",
+}
+
+UNIVERSITY_MAP: dict[str, str] = {
+    "Non-Critical": "low",
+    "Critical": "moderate",
+    "Mission Critical": "excessive",
+}
+
+RISK_LEVEL_MAP: list[tuple[int, str]] = [
+    (90, "CRITICAL"),
+    (70, "HIGH"),
+    (40, "MEDIUM"),
+    (16, "LOW-MEDIUM"),
+    (0, "LOW"),
+]
+
+# ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
 
