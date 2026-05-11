@@ -63,12 +63,13 @@ PATCH_FREQ_MAP: dict[str, str] = {
     "Every 3-6 months": "every 3-6 months",
     "Every 6-12 months": "every 6-12 months",
     "Yearly": "yearly+",
-    "Unavailable": "patches unavailable",
+    "Unavailable": "patches unavailable",       # frontend form value
+    "Patches Unavailable": "patches unavailable", # TDX API value
 }
 
 FIREWALL_MAP: dict[str, str] = {
-    "High Coverage": "adequate",
-    "Moderate Coverage": "adequate",
+    "High Coverage": "high",
+    "Moderate Coverage": "moderate",
     "Minimal Coverage": "minimal",
     "No Coverage": "no",
 }
@@ -87,11 +88,11 @@ UNIVERSITY_MAP: dict[str, str] = {
 }
 
 RISK_LEVEL_MAP: list[tuple[int, str]] = [
-    (90, "CRITICAL"),
-    (70, "HIGH"),
+    (90, "LOW"),        # approval score > 90 → great security posture
+    (70, "LOW-MEDIUM"),
     (40, "MEDIUM"),
-    (16, "LOW-MEDIUM"),
-    (0, "LOW"),
+    (16, "HIGH"),
+    (0,  "CRITICAL"),   # approval score ≤ 0 → very poor security posture
 ]
 
 # ---------------------------------------------------------------------------

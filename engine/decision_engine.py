@@ -1,37 +1,38 @@
 def make_exception_decision(risk_score, form_data):
     """
-    Make decision based on risk score and exception type.
+    Make decision based on approval score and exception type.
     Routes per TDX workflow diagram thresholds:
-      - < 16: Approve
+      - > 90: Approve
       - 16-90: Requires Review
-      - > 90: Denied
+      - < 16: Denied
     """
 
     decision = {
-        "risk_score": risk_score,
-        "approval_status": "",
-        "recommendation": "",
+        "risk_score":       risk_score,
+        "approval_status":  "",
+        "recommendation":   "",
         "approval_required": [],
-        "routing": "",
-        "conditions": [],
-        "max_duration": None,
-        "reasoning": [],
+        "routing":          "",
+        "conditions":       [],
+        "max_duration":     None,
+        "reasoning":        [],
     }
 
     exception_type = form_data.get("exception_type", "security")
 
-    if risk_score > 90:
+    # Auto-deny: security posture too poor to consider any exception
+    if risk_score < 16:
         decision["approval_status"] = "Denied"
-        decision["recommendation"] = "DENY"
-        decision["reasoning"].append("Risk score exceeds 90 - automatic denial")
+        decision["recommendation"]  = "DENY"
+        decision["reasoning"].append("Approval score below 16 - automatic denial")
         return decision
 
-    if risk_score >= 16:
-        decision["approval_status"] = "Requires Review"
-        decision["recommendation"] = "REVIEW"
-    else:
+    if risk_score > 90:
         decision["approval_status"] = "Approve"
-        decision["recommendation"] = "APPROVE"
+        decision["recommendation"]  = "APPROVE"
+    else:
+        decision["approval_status"] = "Requires Review"
+        decision["recommendation"]  = "REVIEW"
 
     if exception_type in ["iam", "identity", "access"]:
         decision["routing"] = "IAM"
