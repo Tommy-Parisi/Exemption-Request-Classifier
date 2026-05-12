@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from api.tdx import write_report
 from engine.decision_engine import make_exception_decision
 from engine.rag_integration import RAGIntegrator
 from engine.risk_scorer import calculate_risk_score
@@ -214,6 +215,8 @@ async def _chat_with_agent(message: str, form_data: Optional[dict], session_id: 
     )
 
 
+# Integration hook: POST form data here to run the full evaluation pipeline.
+# Returns a structured text report. Wire this to your submission flow or TDX callback.
 @app.post("/chat")
 async def chat(form: ExceptionForm, request: Request):
     rag: Optional[RAGIntegrator] = request.app.state.rag
@@ -225,10 +228,10 @@ async def chat(form: ExceptionForm, request: Request):
     compliance = None
     narrative = None
     rag_ok = False
+    request_id = str(uuid.uuid4())
 
     if rag is not None:
         try:
-            request_id = str(uuid.uuid4())
             rag_request = build_rag_request(form, scorer_data, request_id)
             compliance = rag.policy_compliance_checker(rag_request, top_k=6)
             narrative = rag.generate_risk_narrative(
@@ -240,6 +243,7 @@ async def chat(form: ExceptionForm, request: Request):
         except Exception as exc:
             logger.error("RAG pipeline error: %s", exc)
 
+    write_report(f"form_{request_id}", form.model_dump(exclude_none=True), score_result, decision, compliance, narrative)
     reply = format_reply(score_result, decision, compliance, narrative, rag_ok)
     return {"reply": reply}
 

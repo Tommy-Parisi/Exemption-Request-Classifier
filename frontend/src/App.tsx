@@ -79,7 +79,6 @@ function App() {
     attachment: null,
   });
 
-  const [response, setResponse] = useState("");
   const [isOpen, setIsOpen] = useState(true);
   const [messages, setMessages] = useState<BubbleMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -107,19 +106,10 @@ function App() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const res = await fetch(`${API_BASE}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      setResponse(data.reply || "No response from backend");
-    } catch {
-      setResponse("Error: Could not reach backend");
-    }
+    // TODO: wire up form submission (e.g. POST to /chat or integrate with TDX)
+    console.log("Form submitted", formData);
   };
 
   const sendMessage = async () => {
@@ -589,16 +579,6 @@ function App() {
               </form>
             </div>
 
-            {response && (
-              <div className="mt-10 border-t pt-6">
-                <h3 className="text-xl font-semibold text-[var(--ud-blue)] mb-2">
-                  AI Evaluation
-                </h3>
-                <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <p className="text-gray-800 whitespace-pre-wrap">{response}</p>
-                </div>
-              </div>
-            )}
           </div>
         </main>
 
