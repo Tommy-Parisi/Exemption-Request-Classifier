@@ -84,6 +84,9 @@ function App() {
   const [inputValue, setInputValue] = useState("");
   const [isChatting, setIsChatting] = useState(false);
   const [chatSessionId, setChatSessionId] = useState(getInitialChatSessionId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportText, setReportText] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -106,10 +109,28 @@ function App() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: wire up form submission (e.g. POST to /chat or integrate with TDX)
-    console.log("Form submitted", formData);
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setReportText(null);
+
+    const { attachment: _attachment, ...payload } = formData;
+
+    try {
+      const res = await fetch(`${API_BASE}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data = await res.json();
+      setReportText(data.reply);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -572,10 +593,14 @@ function App() {
 
                 <button
                   type="submit"
-                  className="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition font-medium"
+                  disabled={isSubmitting}
+                  className="bg-blue-700 text-white px-6 py-2 rounded-md hover:bg-blue-800 transition font-medium disabled:opacity-50"
                 >
-                  Submit
+                  {isSubmitting ? "Submitting…" : "Submit"}
                 </button>
+                {submitError && (
+                  <p className="text-red-600 text-sm mt-2">{submitError}</p>
+                )}
               </form>
             </div>
 
@@ -590,6 +615,31 @@ function App() {
           </p>
         </footer>
       </div>
+
+      {reportText && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setReportText(null)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">Evaluation Report</h3>
+              <button
+                className="text-gray-500 hover:text-gray-800 text-xl leading-none"
+                onClick={() => setReportText(null)}
+              >
+                ×
+              </button>
+            </div>
+            <pre className="p-4 overflow-y-auto text-sm text-gray-700 whitespace-pre-wrap font-mono flex-1">
+              {reportText}
+            </pre>
+          </div>
+        </div>
+      )}
 
       <div className="chat-bubble" onClick={toggleChat}>💬</div>
       {isOpen && (
