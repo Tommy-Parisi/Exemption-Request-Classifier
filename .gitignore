@@ -27,3 +27,6 @@ api/weight.json
 attachment.json
 api/filtered_form_output.json
 api/test.py
+
+# Generated evaluation reports
+reports/
