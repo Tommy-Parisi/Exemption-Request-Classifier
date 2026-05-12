@@ -2,411 +2,269 @@
 
 ## Overview
 
-The Retrieval-Augmented Generation (RAG) system enhances the Security Exception Request Processing System by providing intelligent policy analysis, automated compliance checking, and executive risk assessment capabilities. The system combines semantic search across university security policies with large language model analysis to provide comprehensive decision support.
+The Retrieval-Augmented Generation (RAG) system provides policy compliance checking and executive risk narrative generation for the Security Exception Request Classifier. It combines semantic vector search across university IT security policies (stored in Firestore) with LLM analysis (Google Gemini) to produce structured compliance assessments and plain-English risk summaries.
+
+The RAG system is used in two contexts:
+- **Evaluation pipeline** — `engine/rag_integration.py` (`RAGIntegrator`) is called by both `api/routes.py` and `api/tdx.py` during request evaluation.
+- **Chat assistant** — `services/agent_service.py` (`PolicyDatabase`) wraps `RAGIntegrator` for policy lookups during form-filling assistance.
+
+---
 
 ## System Components
 
-### 1. Core Infrastructure
-- **Vector Database**: Google Cloud Firestore (native vector search)
-- **Embedding Model**: Google `gemini-embedding-001` API (768-dimensional vectors)
-- **Language Model**: Google Gemini 2.0-flash (non-reasoning model)
-- **Policy Corpus**: 79 university security policies with NIST SP 800-53 references
+### Core Infrastructure
+- **Vector Database**: Google Cloud Firestore (native vector search via `find_nearest`)
+- **Embedding Model**: Google `gemini-embedding-001` (768-dimensional vectors, `RETRIEVAL_QUERY` task type)
+- **LLM**: Google Gemini (model configured via `LLM_API_URL` env var; defaults to `gemini-2.0-flash`)
+- **Policy Corpus**: 79+ university IT security policies stored as chunked documents with NIST references
+- **Embedding Cache**: `shelve`-backed disk cache (`.rag_cache`) with 6-hour TTL — avoids redundant embedding API calls
+- **Policy Memory Cache**: in-process dict cache of `PolicyMatch` objects with 6-hour TTL
 
-### 2. Key Technologies
-- **Semantic Search**: Hybrid vector + keyword search for policy retrieval
-- **Natural Language Processing**: Advanced text analysis and generation
-- **Policy Classification**: Automated categorization (IR, PE, AS, DM, AQ, CP domains)
-- **Risk Scoring Integration**: Quantitative risk assessment with qualitative narratives
+### Key Classes
+
+| Class / Module | Location | Purpose |
+|---|---|---|
+| `RAGIntegrator` | `engine/rag_integration.py` | Firestore connection, embedding generation, hybrid search, LLM calls |
+| `PolicyMatch` | `engine/rag_integration.py` | Dataclass: `id`, `score`, `metadata`, `text` |
+| `PolicyDatabase` | `services/agent_service.py` | Wraps `RAGIntegrator` for chat tool use; falls back to local JSON |
+
+---
 
 ## Complete RAG Pipeline
 
-### Phase 1: Data Ingestion & Indexing (Pre-Processing)
-```
-University Policy Documents → Text Extraction → Chunking → Embedding Generation → Vector Storage
-```
-
-**Inputs:**
-- University security policy documents (PDF, Word, text)
-- Policy metadata (categories, NIST references, effective dates)
-
-**Processing Steps:**
-1. **Document Parsing**: Extract text content from policy documents
-2. **Text Chunking**: Break documents into semantic chunks (typically 512-1024 tokens)
-3. **Metadata Enrichment**: Add policy categories, NIST mappings, and identifiers
-4. **Embedding Generation**: Create 768-dimensional vectors using Google `gemini-embedding-001` API
-5. **Vector Storage**: Store embeddings in Firestore `policies` collection with metadata
-
-**Outputs:**
-- Searchable vector database with 79 indexed policies
-- Metadata-enriched policy chunks with semantic relationships
-
-### Phase 2: Exception Request Processing (Runtime)
-
-#### Step 2.1: Policy Search & Retrieval
-```
-Exception Request → Query Formation → Hybrid Search → Relevant Policies
-```
-
-**Function**: `hybrid_search(query: str, top_k: int = 5)`
-
-**Inputs:**
-- Natural language query describing the exception request
-- Search parameters (top_k results, filters)
-
-**Processing Steps:**
-1. **Query Processing**: Clean and normalize input text
-2. **Embedding Generation**: Convert query to 768-dimensional vector
-3. **Hybrid Search Execution**:
-   - Vector similarity search in Firestore (`find_nearest`)
-   - Keyword matching for specific policy references
-   - Relevance score calculation (0.0 - 1.0 scale)
-4. **Result Ranking**: Order by relevance score and metadata matching
-
-**Outputs:**
-- List of `PolicyMatch` objects containing:
-  - Policy ID and text content
-  - Relevance score
-  - Policy metadata (category, NIST references)
-
-#### Step 2.2: Compliance Analysis
-```
-Exception Request + Retrieved Policies → LLM Analysis → Compliance Assessment
-```
-
-**Function**: `policy_compliance_checker(exception_request: Dict, top_k: int = 5)`
-
-**Inputs:**
-- Exception request details:
-  ```json
-  {
-    "id": "EXC-2025-001",
-    "exception_type": "cloud database hosting",
-    "data_level": "Level III",
-    "security_controls": ["encryption at rest", "VPN access"],
-    "description": "Migration to AWS RDS",
-    "business_justification": "Cost reduction",
-    "duration": "permanent",
-    "affected_systems": ["payroll-db"]
-  }
-  ```
-- Search parameters for policy retrieval
-
-**Processing Steps:**
-1. **Policy Retrieval**: Use hybrid search to find relevant policies
-2. **Context Assembly**: Combine exception details with retrieved policies
-3. **LLM Prompt Construction**: Create structured prompt for compliance analysis
-4. **LLM Analysis**: Send to Google Gemini for policy interpretation
-5. **Response Parsing**: Extract structured compliance assessment
-6. **Result Validation**: Ensure response completeness and format
-
-**Outputs:**
-- Compliance assessment object:
-  ```json
-  {
-    "compliance_status": "NON_COMPLIANT | POTENTIAL_ISSUE | COMPLIANT",
-    "violations": ["List of specific policy violations"],
-    "required_controls": ["List of mandatory security controls"],
-    "policy_refs": ["Referenced policy IDs"],
-    "analysis_summary": "Executive summary text"
-  }
-  ```
-
-#### Step 2.3: Risk Narrative Generation
-```
-Risk Factors + Policy Context → LLM Synthesis → Executive Report
-```
-
-**Function**: `generate_risk_narrative(risk_score: float, factors: Dict, policy_refs: List)`
-
-**Inputs:**
-- Quantitative risk score (0-100 scale)
-- Risk factor details:
-  ```json
-  {
-    "data_classification": "Level III (PII, Financial)",
-    "environment": "Public Cloud (AWS)",
-    "compliance_requirements": ["SOX", "GDPR"],
-    "existing_controls": ["Encryption", "Access logging"],
-    "missing_controls": ["DLP", "Real-time monitoring"],
-    "business_impact": "High - Critical HR operations",
-    "implementation_timeline": "6 months"
-  }
-  ```
-- Applicable policy references
-
-**Processing Steps:**
-1. **Context Aggregation**: Combine risk data with policy requirements
-2. **Narrative Template Selection**: Choose appropriate executive report format
-3. **LLM Generation**: Create comprehensive risk narrative
-4. **Executive Formatting**: Structure for management consumption
-5. **Quality Validation**: Ensure professional tone and completeness
-
-**Outputs:**
-- Executive risk narrative containing:
-  - Risk assessment summary
-  - Business impact analysis
-  - Recommended mitigations
-  - Policy compliance guidance
-  - Implementation priorities
-
-### Phase 3: Decision Support Integration
-
-#### Step 3.1: Risk Score Enhancement
-```
-Compliance Results → Risk Factor Adjustment → Enhanced Risk Score
-```
-
-**Integration Points:**
-- Compliance violations increase risk score
-- Missing controls add risk multipliers
-- Policy alignment provides risk mitigation factors
-
-#### Step 3.2: Approval Workflow Routing
-```
-Risk Assessment → Business Rules → Workflow Assignment
-```
-
-**Decision Logic:**
-- High-risk exceptions → Senior management approval
-- Policy violations → Security committee review
-- Compliant requests → Automated processing
-
-#### Step 3.3: Executive Reporting
-```
-Risk Narratives → Report Generation → Management Dashboard
-```
-
-**Report Components:**
-- Executive summary with risk scoring
-- Policy compliance assessment
-- Recommended security controls
-- Implementation timeline and priorities
-
-## Data Flow Architecture
+### Phase 1: Data Ingestion & Indexing (one-time setup)
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ Exception       │    │ RAG Integration  │    │ Decision Engine │
-│ Request Intake  │───▶│ System           │───▶│ Processing      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Policy Database  │
-                       │ (Firestore       │
-                       │ Vector Store)    │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Google Gemini    │
-                       │ LLM Service      │
-                       └──────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Executive        │
-                       │ Reports &        │
-                       │ Risk Narratives  │
-                       └──────────────────┘
+Policy JSON → Text Chunking → Embedding Generation → Firestore Storage
 ```
 
-## API Interface Specification
+Run `database/vector_db.py` once to seed Firestore. Each policy chunk is stored as a Firestore document with:
+- `chunk_text` — the policy text
+- `embedding` — 768-dimensional float vector
+- Metadata fields: `control_id`, `risk_area`, `nist_reference`, `category`, `classification_levels`, `is_exception_related`, `requires_approval`, `approver_role`, etc.
 
-### Input Schemas
+The local copy of all policies is also maintained as `data/data.json` and serves as a fallback.
 
-#### Exception Request
-```python
+---
+
+### Phase 2: Exception Request Evaluation (runtime)
+
+#### Step 2.1 — Embedding Generation
+
+**Function**: `RAGIntegrator._get_embedding(text: str) → List[float]`
+
+1. Check shelve cache; return cached vector if fresh (< 6 h old).
+2. POST to `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent` with `RETRIEVAL_QUERY` task type.
+3. Validate that the returned vector has exactly 768 dimensions.
+4. Save to shelve cache and return.
+5. If the API call fails and no cached vector exists, raise `RuntimeError` — no pseudo-random fallback is used (garbage results are worse than a hard failure).
+
+---
+
+#### Step 2.2 — Hybrid Search
+
+**Function**: `RAGIntegrator.hybrid_search(query, top_k, metadata_filter, keywords) → List[PolicyMatch]`
+
+```
+Query text → Embedding → Firestore vector search (semantic)
+                       ↘ keyword scan of in-process policy cache
+                         → merge + rank → top_k PolicyMatch objects
+```
+
+1. **Semantic search**: `collection.find_nearest(vector_field="embedding", query_vector=Vector(embedding), distance_measure=COSINE, limit=top_k*2)`. Distance converted to score: `score = max(0.0, 1.0 − distance/2.0)`.
+2. **Keyword search**: scans the in-process `_policy_cache` (populated from prior searches) for any match whose text contains all supplied keywords.
+3. Merges both result sets (higher score wins on collision), sorts by score descending, truncates to `top_k`.
+4. Caches each result in `_policy_cache`.
+
+Optional `metadata_filter` supports exact-match and `$in`-list filtering on any metadata field.
+
+---
+
+#### Step 2.3 — Policy Compliance Check
+
+**Function**: `RAGIntegrator.policy_compliance_checker(request_data, top_k) → Dict`
+
+**Input** (built by `api/routes.py` / `api/tdx.py`):
+```json
 {
-    "id": "string",                    # Unique request identifier
-    "exception_type": "string",        # Type of security exception
-    "data_level": "Level I|II|III",    # Data sensitivity classification
-    "security_controls": ["string"],   # Proposed security measures
-    "description": "string",           # Detailed description
-    "business_justification": "string", # Business case
-    "duration": "string",              # Exception duration
-    "affected_systems": ["string"]     # Impacted systems list
+  "id": "<uuid>",
+  "exception_type": "crowdstrike",
+  "data_level": "III",
+  "security_controls": ["vulnerability scanning", "os up to date"]
 }
 ```
 
-#### Risk Factors
-```python
+**Steps**:
+1. Builds a query string from `exception_type` + `data_level` + `security_controls`.
+2. Calls `hybrid_search` with those keywords and `top_k=6` (default).
+3. Assembles a prompt containing the request JSON and up to 6 policy excerpts with their IDs, scores, and metadata.
+4. Calls `_call_llm_json` → Gemini with `responseMimeType: application/json`.
+5. If the LLM omits `policy_refs`, falls back to the IDs of the retrieved matches.
+
+**Output**:
+```json
 {
-    "data_classification": "string",   # Data sensitivity details
-    "environment": "string",           # Deployment environment
-    "compliance_requirements": ["string"], # Regulatory requirements
-    "existing_controls": ["string"],   # Current security measures
-    "missing_controls": ["string"],    # Identified control gaps
-    "business_impact": "string",       # Impact assessment
-    "implementation_timeline": "string" # Project timeline
+  "compliance_status": "NON_COMPLIANT | POTENTIAL_ISSUE | COMPLIANT",
+  "violations": [{"policy": "...", "reason": "..."}],
+  "required_controls": ["..."],
+  "policy_refs": ["policy-id-1", "policy-id-2"]
 }
 ```
 
-### Output Schemas
+---
 
-#### Policy Match
+#### Step 2.4 — Risk Narrative Generation
+
+**Function**: `RAGIntegrator.generate_risk_narrative(risk_score, factors, policy_refs) → str`
+
+**Input**:
+- `risk_score`: integer approval score (0–114 range)
+- `factors`: score breakdown dict (data_classification, security_controls, network_posture, patch_management, impact_assessment)
+- `policy_refs`: list of policy IDs from the compliance check
+
+**Steps**:
+1. Builds a prompt asking for a concise executive risk narrative.
+2. Calls `_call_llm_json` → Gemini.
+3. Extracts the narrative string from the response, checking keys `narrative`, `summary`, `executive_risk_narrative`, or the first value in the dict.
+
+**Output**: Plain-text executive narrative (2–4 paragraphs).
+
+---
+
+#### Step 2.5 — LLM Wrapper
+
+**Function**: `RAGIntegrator._call_llm_json(prompt: str) → Dict`
+
+- Posts to the configured `LLM_API_URL` with `temperature=0.25` and `responseMimeType: application/json`.
+- Retries up to `max_retries` times (default 4) with exponential backoff (capped at 8 s).
+- Raises `RuntimeError` after all retries exhausted.
+
+---
+
+### Phase 3: Chat Assistant Policy Lookup
+
+**Class**: `PolicyDatabase` in `services/agent_service.py`
+
+Used by the `search_policy_database` tool in the chat agent. The lookup strategy:
+
+1. **Firestore first**: calls `RAGIntegrator.hybrid_search` with keyword extraction (stop-word filtered, max 8 tokens).
+2. **Local JSON fallback**: token-based TF-IDF-style scoring across `data/data.json` if Firestore is unavailable or returns no results.
+3. Normalises Firestore results to a standard dict shape (`control_id`, `risk_area`, `requirements`, `classification_levels`, `chunk_text`, `score`, `source`).
+
+---
+
+## Data Flow Diagram
+
+```
+Form / TDX ticket
+       │
+       ▼
+  map_form_to_scorer / map_ticket_to_scorer
+       │
+       ├──▶ calculate_risk_score  ──────────────────────────────────────┐
+       │         (engine/risk_scorer.py)                                │
+       │                                                                │
+       ├──▶ make_exception_decision ─────────────────────────────────── │
+       │         (engine/decision_engine.py)                            │
+       │                                                                │
+       └──▶ RAGIntegrator (engine/rag_integration.py)                   │
+                 │                                                       │
+                 ├─▶ _get_embedding  ──▶ gemini-embedding-001            │
+                 │       ↓ 768-d vector                                  │
+                 ├─▶ hybrid_search  ──▶ Firestore find_nearest           │
+                 │       ↓ List[PolicyMatch]                             │
+                 ├─▶ policy_compliance_checker  ──▶ Gemini LLM ──▶ JSON  │
+                 └─▶ generate_risk_narrative    ──▶ Gemini LLM ──▶ str   │
+                                                                         │
+                 ┌───────────────────────────────────────────────────────┘
+                 ▼
+          write_report  (api/tdx.write_report)
+          reports/<id>.txt
+```
+
+---
+
+## API Contracts
+
+### `hybrid_search` output — `PolicyMatch`
+```python
+@dataclass
+class PolicyMatch:
+    id: str          # Firestore document ID
+    score: float     # 0.0–1.0 cosine similarity score
+    metadata: dict   # all non-embedding Firestore fields
+    text: str        # chunk_text value
+```
+
+### `policy_compliance_checker` output
 ```python
 {
-    "id": "string",                    # Policy identifier
-    "text": "string",                   # Policy text content
-    "score": "float",                  # Relevance score (0.0-1.0)
-    "metadata": {
-        "category": "string",          # Policy domain (IR, PE, AS, etc.)
-        "nist_reference": "string",    # NIST SP 800-53 mapping
-        "effective_date": "string"     # Policy effective date
-    }
+    "compliance_status": str,      # NON_COMPLIANT | POTENTIAL_ISSUE | COMPLIANT
+    "violations":        list,     # list of str or {"policy": str, "reason": str}
+    "required_controls": list,     # list of str
+    "policy_refs":       list[str] # list of Firestore document IDs
 }
 ```
 
-#### Compliance Assessment
-```python
-{
-    "compliance_status": "string",     # Overall compliance status
-    "violations": ["string"],          # Identified violations
-    "required_controls": ["string"],   # Mandatory controls
-    "policy_refs": ["string"],         # Referenced policy IDs
-    "analysis_summary": "string",      # Executive summary
-    "confidence_score": "float"        # Analysis confidence (0.0-1.0)
-}
-```
+### `generate_risk_narrative` output
+Plain string — 2–4 paragraph executive summary.
 
-## Performance Characteristics
+---
 
-### Response Times
-- Policy search: < 2 seconds
-- Compliance analysis: 3-5 seconds
-- Risk narrative generation: 4-6 seconds
-- End-to-end processing: < 15 seconds
+## Configuration
 
-### Accuracy Metrics
-- Policy retrieval relevance: 85-95%
-- Compliance assessment accuracy: 90-95%
-- Executive narrative quality: Professional grade
+All values read from environment (`.env` via `python-dotenv`):
 
-### Scalability
-- Concurrent requests: 50+ simultaneous
-- Policy corpus: Scalable to 1000+ documents
-- Search performance: Sub-second at scale
-
-## Integration Points
-
-### 1. Decision Engine Integration
-```python
-# Example integration in decision_engine.py
-from engine.rag_integration import RAGIntegrator
-
-rag = RAGIntegrator()
-
-def process_exception_request(request_data):
-    # Get compliance analysis
-    compliance = rag.policy_compliance_checker(request_data)
-    
-    # Adjust risk score based on compliance
-    risk_adjustments = calculate_risk_adjustments(compliance)
-    
-    # Generate executive narrative
-    narrative = rag.generate_risk_narrative(
-        risk_score, risk_factors, compliance['policy_refs']
-    )
-    
-    return {
-        'compliance': compliance,
-        'risk_narrative': narrative,
-        'recommended_action': determine_action(compliance, risk_score)
-    }
-```
-
-### 2. API Layer Integration
-```python
-# Example API endpoint integration
-@app.post("/api/exception-requests/{request_id}/analyze")
-async def analyze_exception_request(request_id: str, request_data: dict):
-    rag = RAGIntegrator()
-    
-    analysis = {
-        'compliance_check': rag.policy_compliance_checker(request_data),
-        'policy_search': rag.hybrid_search(request_data['description']),
-        'risk_assessment': generate_risk_assessment(request_data)
-    }
-    
-    return analysis
-```
-
-### 3. Reporting Integration
-```python
-# Example executive report generation
-def generate_executive_report(request_data, analysis_results):
-    return {
-        'executive_summary': analysis_results['risk_narrative'],
-        'compliance_status': analysis_results['compliance']['status'],
-        'key_risks': extract_key_risks(analysis_results),
-        'recommendations': generate_recommendations(analysis_results),
-        'approval_recommendation': determine_approval_path(analysis_results)
-    }
-```
-
-## Configuration and Deployment
-
-### Environment Variables
 ```bash
-GOOGLE_CLOUD_PROJECT=your-gcp-project-id
+# Firestore
+GOOGLE_CLOUD_PROJECT=capstone-489617
 FIRESTORE_DATABASE=policies
 FIRESTORE_COLLECTION=policies
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
-LLM_API_KEY=<google_gemini_api_key>
+
+# Gemini LLM
+GOOGLE_API_KEY=<key>
+LLM_API_KEY=<key>                  # alias; GOOGLE_API_KEY takes precedence
 LLM_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+GEMINI_CHAT_MODEL=gemini-2.5-flash  # used by the chat agent
 ```
+
+`RAGIntegrator` is initialised once at server startup via FastAPI's `lifespan` hook and stored on `app.state.rag`. If initialisation fails, `app.state.rag` is set to `None` and all RAG steps are skipped gracefully.
 
 ### Dependencies
 ```
 google-cloud-firestore>=2.16.0
 requests>=2.28.0
 python-dotenv>=1.0.0
+openai-agents            # for chat assistant
 ```
 
-### Initialization
-```python
-from engine.rag_integration import RAGIntegrator
+---
 
-# Initialize with default configuration
-rag = RAGIntegrator()
+## Caching
 
-# System is ready for processing
-```
+| Cache | Backing store | TTL | Key |
+|---|---|---|---|
+| Embedding cache | `shelve` (`.rag_cache`) | 6 hours | Raw query/policy text |
+| Policy match cache | In-process dict | 6 hours | Firestore document ID |
 
-## Security Considerations
+---
 
-### 1. Data Protection
-- API keys stored in environment variables
-- No sensitive data stored in vector database
-- Policy text anonymized where required
+## Error Handling & Degradation
 
-### 2. Access Control
-- API authentication required
-- Role-based access to different functions
-- Audit logging for all operations
+| Failure | Behaviour |
+|---|---|
+| Embedding API unavailable | `RuntimeError` propagated; compliance check skipped; report notes RAG unavailable |
+| Firestore unavailable | `hybrid_search` returns empty list; compliance check skipped |
+| LLM call fails after retries | `RuntimeError` propagated; narrative omitted from report |
+| `google-cloud-firestore` not installed | Warns at import; `RAGIntegrator.is_ready` returns `False` |
+| Chat: Firestore unavailable | `PolicyDatabase` falls back to local JSON token search |
 
-### 3. Data Retention
-- Vector embeddings: Persistent storage
-- LLM interactions: Logged for audit
-- Personal data: Excluded from indexing
+---
 
-## Monitoring and Maintenance
+## Performance Notes
 
-### 1. System Health Monitoring
-- Vector database connectivity
-- LLM service availability
-- Response time tracking
-- Error rate monitoring
-
-### 2. Content Management
-- Policy update procedures
-- Re-indexing workflows
-- Version control for policy corpus
-
-### 3. Performance Optimization
-- Vector search tuning
-- LLM prompt optimization
-- Caching strategies for common queries
-
-This RAG system provides a comprehensive foundation for intelligent security governance, combining the precision of vector search with the contextual understanding of large language models to deliver actionable insights for security exception management.
+- Embedding calls are cached aggressively (6 h TTL) — repeated queries for the same exception type incur no API cost.
+- `find_nearest` requests `top_k * 2` candidates from Firestore then re-ranks, reducing the chance of missing relevant results due to distance-only ordering.
+- LLM prompts are built inline and kept short — policy excerpts are capped to what Firestore returns for the top `k` matches; no chunking or token-counting logic is needed at current corpus sizes.
+- The chat assistant uses `session_settings=SessionSettings(limit=40)` to bound context window growth.
